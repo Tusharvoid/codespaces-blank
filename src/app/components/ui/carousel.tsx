@@ -77,15 +77,22 @@ function Carousel({
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "ArrowLeft") {
+      const target = event.target as HTMLElement;
+      if (
+        event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey ||
+        target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false']), [role='textbox'], [role='combobox'], [role='slider'], [role='spinbutton']") ||
+        target.closest('[data-slot="carousel"]') !== event.currentTarget
+      ) return;
+
+      if (event.key === (orientation === "horizontal" ? "ArrowLeft" : "ArrowUp")) {
         event.preventDefault();
         scrollPrev();
-      } else if (event.key === "ArrowRight") {
+      } else if (event.key === (orientation === "horizontal" ? "ArrowRight" : "ArrowDown")) {
         event.preventDefault();
         scrollNext();
       }
     },
-    [scrollPrev, scrollNext],
+    [orientation, scrollPrev, scrollNext],
   );
 
   React.useEffect(() => {
@@ -101,6 +108,7 @@ function Carousel({
 
     return () => {
       api?.off("select", onSelect);
+      api?.off("reInit", onSelect);
     };
   }, [api, onSelect]);
 
@@ -119,7 +127,7 @@ function Carousel({
       }}
     >
       <div
-        onKeyDownCapture={handleKeyDown}
+        onKeyDown={handleKeyDown}
         className={cn("relative", className)}
         role="region"
         aria-roledescription="carousel"

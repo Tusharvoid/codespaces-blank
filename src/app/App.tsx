@@ -1,14 +1,23 @@
 import { useState, useEffect } from "react";
 import {
   MapPin, Phone, Mail, Menu, X, ArrowRight, Star,
-  Calendar, Clock, Users, Shield, Plane, Globe,
+  Calendar, Clock, Shield, Plane, Globe,
   ChevronDown, ChevronRight, Bus, Train, Hotel,
   CreditCard, FileText, Car, Smartphone, Gift,
   Facebook, Youtube, Instagram, Search,
 } from "lucide-react";
+import { DestinationImage, type GalleryImage } from "./components/ImageSlider";
+import { MovingStrip } from "./components/MovingStrip";
+import bodhgayaImage from "../assets/destinations/bodhgaya-mahabodhi.jpg";
+import bhutanImage from "../assets/destinations/bhutan-tigers-nest.jpg";
+import baliImage from "../assets/destinations/bali-ulun-danu.jpg";
+import sriLankaImage from "../assets/destinations/sri-lanka-sigiriya.jpg";
+import mahabaleshwarImage from "../assets/destinations/mahabaleshwar-elephants-head.jpg";
+import fontLicense from "../assets/fonts/OFL.txt?url";
 
 type Page = "home" | "tours" | "tour-detail" | "services" | "about" | "contact";
-type FilterType = "all" | "domestic" | "international" | "weekend";
+type Experience = "wild-safari" | "strangers" | "adventure" | "meditate-discover";
+type FilterType = "all" | "domestic" | "international" | "weekend" | Experience;
 
 interface Tour {
   id: string;
@@ -17,6 +26,10 @@ interface Tour {
   category: "domestic" | "international" | "weekend";
   duration: string;
   image: string;
+  imageAlt?: string;
+  imagePosition?: string;
+  banner?: GalleryImage;
+  experiences?: Experience[];
   highlights: string[];
   price: string;
   priceNote: string;
@@ -34,6 +47,8 @@ const TOURS: Tour[] = [
     category: "domestic",
     duration: "6 Nights / 7 Days",
     image: "https://images.unsplash.com/photo-1627894485200-b92fb4353967?w=800&h=500&fit=crop&auto=format",
+    imageAlt: "A traveller resting in Kashmir's green mountain valley",
+    banner: { src: "https://images.unsplash.com/photo-1627894485200-b92fb4353967?w=1600&h=900&fit=crop&auto=format", alt: "A traveller resting below Kashmir's mountain peaks", position: "50% 45%" },
     highlights: ["Dal Lake Shikara Ride", "Gulmarg Gondola", "Pahalgam Valley", "Srinagar Houseboats"],
     price: "₹28,500",
     priceNote: "per person (twin sharing)",
@@ -53,6 +68,7 @@ const TOURS: Tour[] = [
   {
     id: "ladakh",
     name: "Best of Ladakh",
+    experiences: ["adventure"],
     destination: "Leh-Ladakh, India",
     category: "domestic",
     duration: "7 Nights / 8 Days",
@@ -141,10 +157,13 @@ const TOURS: Tour[] = [
   {
     id: "sri-lanka",
     name: "Sri Lanka Pilgrimage",
+    experiences: ["meditate-discover"],
     destination: "Sri Lanka",
     category: "international",
     duration: "6 Nights / 7 Days",
-    image: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=800&h=500&fit=crop&auto=format",
+    image: sriLankaImage,
+    imageAlt: "Sigiriya rock fortress rising above its ancient gardens in Sri Lanka",
+    imagePosition: "50% 25%",
     highlights: ["Adam's Peak Sunrise Climb", "Temple of the Tooth Kandy", "Sigiriya Rock Fortress", "Kelaniya Temple"],
     price: "₹55,000",
     priceNote: "per person (twin sharing, includes visa)",
@@ -188,7 +207,9 @@ const TOURS: Tour[] = [
     destination: "Mahabaleshwar, Maharashtra",
     category: "weekend",
     duration: "1 Night / 2 Days",
-    image: "https://images.unsplash.com/photo-1587135941948-670b381f08ce?w=800&h=500&fit=crop&auto=format",
+    image: mahabaleshwarImage,
+    imageAlt: "Elephant's Head rock formation at Needle Hole Point in Mahabaleshwar, Maharashtra",
+    imagePosition: "45% 45%",
     highlights: ["Venna Lake Boating", "Mapro Garden", "Wilson Point Sunrise", "Elephant Head Viewpoint"],
     price: "₹5,500",
     priceNote: "per person (twin sharing)",
@@ -202,19 +223,57 @@ const TOURS: Tour[] = [
   },
 ];
 
-const SERVICES = [
-  { icon: Plane, name: "Air Ticketing", description: "Domestic and international flight bookings at competitive fares. All major airlines covered — IndiGo, Air India, Emirates, and more." },
-  { icon: Bus, name: "Bus Reservation", description: "Volvo, sleeper, and luxury bus bookings across India. AC and non-AC options available for all routes." },
-  { icon: Train, name: "Railway Reservation", description: "Indian Railways booking assistance for all classes and categories including tatkal and premium tatkal." },
-  { icon: Hotel, name: "Hotel Booking", description: "Budget guesthouses to 5-star luxury resorts — domestic and international hotel reservations at best available rates." },
-  { icon: FileText, name: "Passport Assistance", description: "Fresh passport applications and renewal guidance. Complete document checklist, form filling, and appointment support." },
-  { icon: Globe, name: "Visa Assistance", description: "Tourist, business, and transit visas for UK, Schengen, Dubai, Thailand, Sri Lanka, and 50+ countries." },
-  { icon: CreditCard, name: "Forex Assistance", description: "Foreign currency exchange and prepaid travel cards at competitive rates. All major currencies available." },
-  { icon: Shield, name: "Travel Insurance", description: "Comprehensive single-trip and annual multi-trip insurance covering medical emergencies, trip cancellation, and baggage loss." },
-  { icon: Car, name: "Car Rental", description: "Self-drive and chauffeur-driven vehicles for airport transfers, outstation trips, and local sightseeing across India." },
-  { icon: Smartphone, name: "International SIM", description: "Pre-activated international SIM cards for 100+ countries — affordable data and calling plans for hassle-free connectivity abroad." },
-  { icon: Gift, name: "Event Management", description: "Corporate team outings, family tours, school excursions, honeymoon packages, and MICE events." },
+const FEATURED_DESTINATIONS = [
+  { id: "kerala", name: "Kerala", category: "domestic" },
+  { id: "kashmir", name: "Kashmir", category: "domestic" },
+  { id: "bodhgaya", name: "Bodhgaya", location: "Bihar, India", category: "domestic", image: bodhgayaImage, imageAlt: "Mahabodhi Temple and its gardens in Bodhgaya, Bihar, India", imagePosition: "50% 0%" },
+  { id: "bhutan", name: "Bhutan", location: "Eastern Himalayas", category: "international", image: bhutanImage, imageAlt: "Tiger's Nest monastery perched on a cliff above Paro Valley, Bhutan", imagePosition: "45% 55%" },
+  { id: "bali", name: "Bali", location: "Bali, Indonesia", category: "international", image: baliImage, imageAlt: "Ulun Danu Beratan temple beside Lake Beratan in Bali, Indonesia", imagePosition: "62% 45%" },
+  { id: "sri-lanka", name: "Sri Lanka", category: "international" },
+] as const;
+
+const HERO_IMAGE: GalleryImage = {
+  src: "https://images.unsplash.com/photo-1621232082074-1a7750ecc557?w=1920&h=1080&fit=crop&auto=format",
+  alt: "Forested green valley in Kashmir",
+  position: "50% 40%",
+};
+
+const PHOTO_CREDITS = [
+  { title: "Mahabodhi Temple, Bodhgaya", creator: "WeeKeeEditor / Kavit", source: "https://commons.wikimedia.org/wiki/File:Mahabodhi_Temple_-_Bodh_Gaya.jpg", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" },
+  { title: "Tiger's Nest, Bhutan", creator: "Nina R; edit by UnpetitproleX", source: "https://commons.wikimedia.org/wiki/File:Paro_Taktsang,_Bhutan_(edited).jpg", license: "CC BY 2.0", licenseUrl: "https://creativecommons.org/licenses/by/2.0/" },
+  { title: "Ulun Danu Beratan, Bali", creator: "Unsplash", source: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62", license: "Unsplash License", licenseUrl: "https://unsplash.com/license" },
+  { title: "Sigiriya, Sri Lanka", creator: "Bernard Gagnon", source: "https://commons.wikimedia.org/wiki/File:Sigiriya.jpg", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/" },
+  { title: "Needle Hole Point, Mahabaleshwar", creator: "Rishabh Tatiraju", source: "https://commons.wikimedia.org/wiki/File:Needle_Hole_Point_Mahabaleshwar.JPG", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/" },
 ];
+
+function HelicopterIcon({ size = 24, className }: { size?: number; className?: string }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+    <path d="M5 3h14M12 3v5M8 8h7a5 5 0 0 1 5 5v2H9l-4-5H2V6M12 8v7M9 15v5m8-5v5M6 20h15" />
+  </svg>;
+}
+
+const SERVICES = [
+  { id: "air", icon: Plane, name: "Air Ticket", description: "Domestic and international flight bookings at competitive fares. All major airlines covered — IndiGo, Air India, Emirates, and more." },
+  { id: "bus", icon: Bus, name: "Bus Reservation", description: "Volvo, sleeper, and luxury bus bookings across India. AC and non-AC options available for all routes." },
+  { id: "train", icon: Train, name: "Train Ticket", description: "Indian Railways booking assistance for all classes and categories including tatkal and premium tatkal." },
+  { id: "hotel", icon: Hotel, name: "Hotel Booking", description: "Budget guesthouses to 5-star luxury resorts — domestic and international hotel reservations at best available rates." },
+  { id: "passport", icon: FileText, name: "Passport Assistance", description: "Fresh passport applications and renewal guidance. Complete document checklist, form filling, and appointment support." },
+  { id: "visa", icon: Globe, name: "Visa Assistance", description: "Tourist, business, and transit visas for UK, Schengen, Dubai, Thailand, Sri Lanka, and 50+ countries." },
+  { id: "forex", icon: CreditCard, name: "Forex Assistance", description: "Foreign currency exchange and prepaid travel cards at competitive rates. All major currencies available." },
+  { id: "insurance", icon: Shield, name: "Travel Insurance", description: "Comprehensive single-trip and annual multi-trip insurance covering medical emergencies, trip cancellation, and baggage loss." },
+  { id: "car", icon: Car, name: "Car Rental", description: "Self-drive and chauffeur-driven vehicles for airport transfers, outstation trips, and local sightseeing across India." },
+  { id: "sim", icon: Smartphone, name: "International SIM", description: "Pre-activated international SIM cards for 100+ countries — affordable data and calling plans for hassle-free connectivity abroad." },
+  { id: "event", icon: Gift, name: "Event Management", description: "Corporate team outings, family tours, school excursions, honeymoon packages, and MICE events." },
+  { id: "visa-passport", icon: FileText, name: "Visa & Passport Club", description: "Visa and passport guidance in one place, from document checklists to application and renewal assistance. This is a combined assistance service, not a membership programme." },
+  { id: "helicopter", icon: HelicopterIcon, name: "Helicopter Ride", description: "Enquire about helicopter travel for your destination. Routes, operator availability, permissions, weather conditions, and fares must be confirmed before booking." },
+];
+
+const HOME_SERVICE_IDS = ["visa-passport", "air", "train", "helicopter", "hotel", "event"];
+const HOME_SERVICES = HOME_SERVICE_IDS.map(id => SERVICES.find(service => service.id === id)!);
+
+// Publish only approved affiliations and offers. Empty collections intentionally show honest states.
+const ASSOCIATIONS: { name: string; logo: string }[] = [];
+const OFFERS: { id: string; title: string; benefit: string; tourId: string; validUntil: string; terms: string; announcement: string }[] = [];
 
 const TESTIMONIALS = [
   { name: "Priya Deshmukh", location: "Pune", tour: "Kashmir Valley Escape", rating: 5, text: "Ellora Tours made our Kashmir trip absolutely magical. The houseboat experience on Dal Lake was beyond our expectations. Every detail — from transfers to meals — was perfectly arranged. Will travel with them again." },
@@ -223,29 +282,39 @@ const TESTIMONIALS = [
 ];
 
 const STATS = [
-  { value: "15+", label: "Years of Experience" },
-  { value: "50+", label: "Destinations Covered" },
-  { value: "10,000+", label: "Happy Travellers" },
-  { value: "500+", label: "Tours Completed" },
+  { value: "25", label: "Years of Experience" },
+  { value: "50+", label: "Destinations" },
+  { value: "10,000+", label: "Happy Clients" },
+  { value: "500+", label: "Tours" },
 ];
 
-const FIXED_DEPARTURES = [
-  { destination: "Sri Lanka Pilgrimage", date: "15 Aug 2025", duration: "6N / 7D", seats: 8, price: "₹55,000" },
-  { destination: "Singapore – Malaysia – Thailand", date: "01 Sep 2025", duration: "8N / 9D", seats: 12, price: "₹75,000" },
-  { destination: "European Discovery", date: "10 Sep 2025", duration: "10N / 11D", seats: 6, price: "₹1,85,000" },
-  { destination: "Dubai Delight", date: "25 Sep 2025", duration: "4N / 5D", seats: 15, price: "₹62,000" },
-  { destination: "Leh – Ladakh", date: "05 Jun 2025", duration: "7N / 8D", seats: 10, price: "₹32,000" },
-  { destination: "Shimla – Manali – Delhi", date: "20 May 2025", duration: "6N / 7D", seats: 20, price: "₹19,500" },
+const FIXED_DEPARTURES = ["Rajasthan", "Himachal", "Andaman", "Dubai", "Thailand", "Vietnam"].map(destination => ({
+  destination, date: "Dates to be announced", duration: "On enquiry", availability: "Unconfirmed", price: "On enquiry",
+}));
+
+const TOUR_FILTERS: { f: FilterType; label: string }[] = [
+  { f: "all", label: "All Tours" },
+  { f: "domestic", label: "Domestic" },
+  { f: "international", label: "International" },
+  { f: "weekend", label: "Weekend Getaways" },
+  { f: "wild-safari", label: "Wild Safari" },
+  { f: "strangers", label: "Strangers Package" },
+  { f: "adventure", label: "Adventure Packages" },
+  { f: "meditate-discover", label: "Meditate & Discover" },
 ];
+
+function matchesTourFilter(tour: Tour, filter: FilterType) {
+  return filter === "all" || tour.category === filter || tour.experiences?.some(experience => experience === filter) === true;
+}
 
 // shared style tokens
-const card = "bg-white border border-amber-200/70 shadow-sm";
-const cardHover = "hover:border-amber-400/50 hover:shadow-md";
-const inputCls = "w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-950 placeholder-amber-400/60 outline-none focus:border-amber-400 transition-colors";
-const sectionAlt = "bg-amber-50";
-const labelTxt = "text-amber-600 text-xs font-bold tracking-widest uppercase";
-const bodyTxt = "text-amber-900/60 text-sm leading-relaxed";
-const mutedTxt = "text-amber-800/50";
+const card = "bg-white border border-border shadow-sm";
+const cardHover = "hover:border-primary hover:shadow-md";
+const inputCls = "w-full bg-background border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary transition-colors";
+const sectionAlt = "bg-background";
+const labelTxt = "text-primary text-xs font-bold tracking-widest uppercase";
+const bodyTxt = "text-muted-foreground text-sm leading-relaxed";
+const mutedTxt = "text-muted-foreground";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ROOT
@@ -273,8 +342,14 @@ export default function App() {
   }, [page, selectedTour]);
 
   const navigate = (p: Page, tour?: Tour) => {
+    setMenuOpen(false);
     setPage(p);
     if (tour) setSelectedTour(tour);
+  };
+
+  const enquire = (destination: string) => {
+    setFormData(current => ({ ...current, destination }));
+    navigate("contact");
   };
 
   const navLinks = [
@@ -286,24 +361,24 @@ export default function App() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-[#fffbf0] text-amber-950" style={{ fontFamily: "'Nunito Sans', sans-serif" }}>
+    <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "var(--font-body)" }}>
 
       {/* NAV */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled || page !== "home"
-          ? "bg-white/95 backdrop-blur-md border-b border-amber-200 shadow-sm"
+          ? "bg-background backdrop-blur-md border-b border-border shadow-sm"
           : "bg-transparent"
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 md:h-20">
           <button onClick={() => navigate("home")} className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-sm shadow">
+            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm shadow">
               ET
             </div>
             <div>
-              <div className="text-base font-bold text-amber-700 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <div className={`text-base font-bold leading-tight ${scrolled || page !== "home" ? "text-primary" : "text-white"}`} style={{ fontFamily: "var(--font-display)" }}>
                 Ellora Tours
               </div>
-              <div className="text-[9px] text-amber-500/70 tracking-widest uppercase leading-tight">
+              <div className={`text-[9px] tracking-widest uppercase leading-tight ${scrolled || page !== "home" ? "text-muted-foreground" : "text-white"}`}>
                 &amp; Travels
               </div>
             </div>
@@ -316,8 +391,10 @@ export default function App() {
                 onClick={() => navigate(p)}
                 className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                   page === p
-                    ? "bg-amber-500 text-white shadow"
-                    : "text-amber-800 hover:text-amber-600 hover:bg-amber-100"
+                    ? "bg-primary text-white shadow"
+                    : scrolled || page !== "home"
+                      ? "text-primary hover:text-primary-hover hover:bg-muted"
+                      : "text-white hover:text-white hover:bg-primary"
                 }`}
               >
                 {label}
@@ -325,25 +402,25 @@ export default function App() {
             ))}
             <button
               onClick={() => navigate("contact")}
-              className="ml-3 px-5 py-2 bg-amber-500 text-white font-bold rounded-full text-sm hover:bg-amber-600 transition-all shadow"
+              className="ml-3 px-5 py-2 bg-primary text-white font-bold rounded-full text-sm hover:bg-primary-hover transition-all shadow"
             >
               Book Now
             </button>
           </div>
 
-          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden text-amber-700 p-2" aria-label="Toggle menu">
+          <button onClick={() => setMenuOpen(!menuOpen)} className={`md:hidden p-2 ${scrolled || page !== "home" ? "text-primary" : "text-white"}`} aria-label="Toggle menu" aria-expanded={menuOpen}>
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
 
         {menuOpen && (
-          <div className="md:hidden bg-white border-t border-amber-100 px-6 py-4 flex flex-col gap-2 shadow-md">
+          <div className="md:hidden bg-white border-t border-border px-6 py-4 flex flex-col gap-2 shadow-md">
             {navLinks.map(({ label, p }) => (
               <button
                 key={p}
                 onClick={() => navigate(p)}
                 className={`text-left py-2.5 text-sm font-semibold transition-colors ${
-                  page === p ? "text-amber-600" : "text-amber-800 hover:text-amber-600"
+                  page === p ? "text-primary" : "text-foreground hover:text-primary-hover"
                 }`}
               >
                 {label}
@@ -351,7 +428,7 @@ export default function App() {
             ))}
             <button
               onClick={() => navigate("contact")}
-              className="mt-2 w-full py-3 bg-amber-500 text-white font-bold rounded-xl text-sm"
+              className="mt-2 w-full py-3 bg-primary text-white font-bold rounded-xl text-sm"
             >
               Book Now
             </button>
@@ -360,7 +437,8 @@ export default function App() {
       </nav>
 
       {/* PAGES */}
-      {page === "home" && <HomePage navigate={navigate} />}
+      <main>
+      {page === "home" && <HomePage navigate={navigate} enquire={enquire} />}
       {page === "tours" && <ToursPage filter={tourFilter} setFilter={setTourFilter} navigate={navigate} />}
       {page === "tour-detail" && selectedTour && (
         <TourDetailPage tour={selectedTour} expandedDay={expandedDay} setExpandedDay={setExpandedDay} navigate={navigate} />
@@ -368,24 +446,25 @@ export default function App() {
       {page === "services" && <ServicesPage navigate={navigate} />}
       {page === "about" && <AboutPage navigate={navigate} />}
       {page === "contact" && <ContactPage formData={formData} setFormData={setFormData} />}
+      </main>
 
       {/* FOOTER */}
-      <footer className="bg-amber-900 pt-16 pb-8">
+      <footer className="bg-primary pt-16 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
           <div>
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-9 h-9 rounded-full bg-amber-400 flex items-center justify-center text-amber-900 font-bold text-sm">ET</div>
+              <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold text-sm">ET</div>
               <div>
-                <div className="text-base font-bold text-amber-200" style={{ fontFamily: "'Playfair Display', serif" }}>Ellora Tours</div>
-                <div className="text-[9px] text-amber-400/60 tracking-widest uppercase">&amp; Travels · Aurangabad</div>
+                <div className="text-base font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Ellora Tours</div>
+                <div className="text-[9px] text-white tracking-widest uppercase">&amp; Travels · Aurangabad</div>
               </div>
             </div>
-            <p className="text-amber-200/50 text-xs leading-relaxed mb-5">
+            <p className="text-white text-xs leading-relaxed mb-5">
               Turning your travel dreams into unforgettable memories since 2009. Your journey is our passion.
             </p>
             <div className="flex gap-2">
               {[Facebook, Youtube, Instagram].map((Icon, i) => (
-                <a key={i} href="#" className="w-8 h-8 rounded-full bg-amber-400/15 border border-amber-400/20 flex items-center justify-center text-amber-300 hover:bg-amber-400/25 transition-colors">
+                <a key={i} href="#" aria-label={["Facebook", "YouTube", "Instagram"][i]} className="w-8 h-8 rounded-full bg-primary border border-white flex items-center justify-center text-white hover:bg-primary-hover transition-colors">
                   <Icon size={13} />
                 </a>
               ))}
@@ -393,50 +472,65 @@ export default function App() {
           </div>
 
           <div>
-            <h4 className="text-amber-400 font-bold text-xs mb-4 tracking-widest uppercase">Domestic Tours</h4>
+            <h4 className="text-white font-bold text-xs mb-4 tracking-widest uppercase">Domestic Tours</h4>
             <ul className="space-y-2">
-              {["Kashmir", "Leh-Ladakh", "Kerala", "Himachal Pradesh", "Goa", "Andaman", "Uttarakhand", "Pilgrimage"].map(d => (
+              {["Kashmir", "Leh-Ladakh", "Kerala", "Himachal Pradesh", "Goa", "Andaman", "Darjeeling - Sikkim", "Bangalore - Mysore - Ooty"].map(d => (
                 <li key={d}>
-                  <button onClick={() => navigate("tours")} className="text-amber-200/50 text-xs hover:text-amber-300 transition-colors">{d}</button>
+                  <button onClick={() => navigate("tours")} className="text-white text-xs hover:underline decoration-accent underline-offset-4 transition-colors">{d}</button>
                 </li>
               ))}
             </ul>
           </div>
 
           <div>
-            <h4 className="text-amber-400 font-bold text-xs mb-4 tracking-widest uppercase">International Tours</h4>
+            <h4 className="text-white font-bold text-xs mb-4 tracking-widest uppercase">International Tours</h4>
             <ul className="space-y-2">
-              {["Sri Lanka", "Thailand", "Dubai", "Europe", "Singapore–Malaysia", "Bali", "Myanmar", "Nepal"].map(d => (
+              {["Sri Lanka", "Thailand", "Dubai", "Europe", "Singapore - Malaysia", "Bali", "Maldives"].map(d => (
                 <li key={d}>
-                  <button onClick={() => navigate("tours")} className="text-amber-200/50 text-xs hover:text-amber-300 transition-colors">{d}</button>
+                  <button onClick={() => navigate("tours")} className="text-white text-xs hover:underline decoration-accent underline-offset-4 transition-colors">{d}</button>
                 </li>
               ))}
             </ul>
           </div>
 
           <div>
-            <h4 className="text-amber-400 font-bold text-xs mb-4 tracking-widest uppercase">Contact Us</h4>
+            <h4 className="text-white font-bold text-xs mb-4 tracking-widest uppercase">Contact Us</h4>
             <ul className="space-y-3">
               <li className="flex gap-2.5">
-                <Phone size={13} className="text-amber-400 mt-0.5 shrink-0" />
-                <span className="text-amber-200/60 text-xs">+91 9422203584<br />+91 8275076777</span>
+                <Phone size={13} className="text-white mt-0.5 shrink-0" />
+                <span className="text-white text-xs leading-relaxed">
+                  <a href="tel:+919422203584" className="hover:underline">+91 9422203584</a><br />
+                  <a href="tel:+918275076777" className="hover:underline">+91 8275076777</a><br />
+                  <a href="tel:+918208014677" className="hover:underline">+91 8208014677</a>
+                </span>
               </li>
               <li className="flex gap-2.5">
-                <Mail size={13} className="text-amber-400 mt-0.5 shrink-0" />
-                <span className="text-amber-200/60 text-xs">elloratours@gmail.com</span>
+                <Mail size={13} className="text-white mt-0.5 shrink-0" />
+                <span className="text-white text-xs">elloratours@gmail.com</span>
               </li>
               <li className="flex gap-2.5">
-                <MapPin size={13} className="text-amber-400 mt-0.5 shrink-0" />
-                <span className="text-amber-200/60 text-xs">Shop No.2, Shangrilla Complex, CBS Road, Samarth Nagar, Aurangabad - 431001</span>
+                <MapPin size={13} className="text-white mt-0.5 shrink-0" />
+                <span className="text-white text-xs">Shop No.2, Shangrilla Complex, CBS Road, Samarth Nagar, Aurangabad - 431001</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 border-t border-amber-800 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-amber-300/30 text-xs">© 2025 Ellora Tours & Travels. All rights reserved.</p>
-          <p className="text-amber-300/30 text-xs">Explore Happiness · Aurangabad, Maharashtra</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 border-t border-border pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
+          <p className="text-white text-xs">© 2025 Ellora Tours & Travels. All rights reserved.</p>
+          <p className="text-white text-xs">Explore Happiness · Aurangabad, Maharashtra</p>
         </div>
+        <details className="max-w-7xl mx-auto px-4 sm:px-6 mt-5 text-white text-xs leading-relaxed">
+          <summary className="cursor-pointer w-fit underline underline-offset-4">Photo &amp; font credits</summary>
+          <p className="mt-4 mb-3">Destination photos are resized and compressed, with crops applied for display. Adapted photos retain their original licenses.</p>
+          <ul className="space-y-2">
+            {PHOTO_CREDITS.map(photo => <li key={photo.title}>
+              <a href={photo.source} target="_blank" rel="noreferrer" className="underline underline-offset-4">{photo.title}</a>{" by "}{photo.creator}{". "}
+              <a href={photo.licenseUrl} target="_blank" rel="noreferrer" className="underline underline-offset-4">{photo.license}</a>.
+            </li>)}
+          </ul>
+          <p className="mt-3">Manrope and DM Sans by their respective project authors, under the <a href={fontLicense} target="_blank" rel="noreferrer" className="underline underline-offset-4">SIL Open Font License 1.1</a>.</p>
+        </details>
       </footer>
     </div>
   );
@@ -446,67 +540,59 @@ export default function App() {
 // HOME
 // ─────────────────────────────────────────────────────────────────────────────
 
-function HomePage({ navigate }: { navigate: (p: Page, t?: Tour) => void }) {
-  const featured = TOURS.slice(0, 6);
-
+function HomePage({ navigate, enquire }: { navigate: (p: Page, t?: Tour) => void; enquire: (destination: string) => void }) {
   return (
     <div>
-      {/* HERO — photo stays, overlay warmed */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1621232082074-1a7750ecc557?w=1920&h=1080&fit=crop&auto=format"
-          alt="Kashmir valley green mountains"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-amber-950/55 via-amber-900/25 to-[#fffbf0]" />
+      {/* HERO */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-32">
+        <DestinationImage {...HERO_IMAGE} priority className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/20 pointer-events-none" />
 
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-amber-400/20 border border-amber-300/40 rounded-full px-4 py-1.5 mb-7 text-amber-100 text-[11px] tracking-widest uppercase font-bold backdrop-blur-sm">
+        <div className="relative z-10 text-center px-4 w-full max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-2 bg-accent border border-accent rounded-full px-4 py-1.5 mb-7 text-accent-foreground text-[11px] tracking-widest uppercase font-bold backdrop-blur-sm">
             <MapPin size={11} /> Based in Aurangabad · Serving All of India
           </div>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-[1.05] mb-5 drop-shadow-lg" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Explore<br /><span className="text-amber-300">Happiness</span>
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-[1.05] mb-5 drop-shadow-lg" style={{ fontFamily: "var(--font-display)" }}>
+            Explore<br /><span className="text-white decoration-accent underline underline-offset-8 decoration-4">Happiness</span>
           </h1>
-          <p className="text-lg md:text-xl text-amber-50/80 mb-10 font-light max-w-2xl mx-auto leading-relaxed drop-shadow">
+          <p className="text-lg md:text-xl text-white mb-10 font-light max-w-2xl mx-auto leading-relaxed drop-shadow">
             From the snow-capped Himalayas to the shores of the Indian Ocean — crafted journeys for every dream.
           </p>
 
-          <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md border border-amber-200 rounded-2xl p-2 max-w-2xl mx-auto mb-5 shadow-lg">
-            <Search size={17} className="text-amber-500 ml-3 shrink-0" />
+          <div className="flex items-center gap-2 bg-background backdrop-blur-md border border-border rounded-2xl p-2 max-w-2xl mx-auto mb-5 shadow-lg">
+            <Search size={17} className="text-primary ml-3 shrink-0" />
             <input
               type="text"
+              aria-label="Search destinations"
               placeholder="Where do you want to go? Kashmir, Goa, Dubai..."
-              className="flex-1 bg-transparent text-amber-900 placeholder-amber-400/70 outline-none text-sm py-2 px-2"
+              className="flex-1 min-w-0 bg-transparent text-foreground placeholder:text-muted-foreground text-sm py-2 px-2"
             />
             <button
               onClick={() => navigate("tours")}
-              className="bg-amber-500 text-white font-bold px-6 py-2.5 rounded-xl text-sm hover:bg-amber-600 transition-colors shrink-0 shadow"
+              className="bg-primary text-white font-bold px-4 sm:px-6 py-2.5 rounded-xl text-sm hover:bg-primary-hover transition-colors shrink-0 shadow"
             >
               Explore
             </button>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 text-amber-100/70 text-xs">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-white text-xs">
             {["Kashmir", "Leh-Ladakh", "Kerala", "Dubai", "Europe", "Sri Lanka"].map(d => (
-              <button key={d} onClick={() => navigate("tours")} className="hover:text-amber-300 transition-colors underline underline-offset-4 decoration-amber-300/40">
+              <button key={d} onClick={() => navigate("tours")} className="hover:text-white transition-colors underline underline-offset-4 decoration-accent">
                 {d}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-amber-600/60 animate-bounce">
-          <ChevronDown size={22} />
-        </div>
       </section>
 
       {/* STATS BAR */}
-      <section className="bg-amber-500 py-8">
+      <section className="bg-background py-8 border-b-4 border-accent" aria-label="Ellora Tours in numbers">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-4">
           {STATS.map(s => (
             <div key={s.label} className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-white" style={{ fontFamily: "'Playfair Display', serif" }}>{s.value}</div>
-              <div className="text-white/70 text-sm font-semibold mt-0.5">{s.label}</div>
+              <div className="text-3xl md:text-4xl font-bold text-primary" style={{ fontFamily: "var(--font-display)" }}>{s.value}</div>
+              <div className="text-muted-foreground text-sm font-semibold mt-0.5">{s.label}</div>
             </div>
           ))}
         </div>
@@ -517,83 +603,132 @@ function HomePage({ navigate }: { navigate: (p: Page, t?: Tour) => void }) {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
             <p className={labelTxt + " mb-2"}>Handpicked Journeys</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-amber-950" style={{ fontFamily: "'Playfair Display', serif" }}>Featured Tours</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-primary" style={{ fontFamily: "var(--font-display)" }}>Featured Tours</h2>
           </div>
-          <button onClick={() => navigate("tours")} className="flex items-center gap-2 text-amber-600 text-sm font-semibold hover:text-amber-700 transition-colors group">
+          <button onClick={() => navigate("tours")} className="flex items-center gap-2 text-primary text-sm font-semibold hover:text-primary-hover transition-colors group">
             View all tours <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {featured.map(tour => <TourCard key={tour.id} tour={tour} navigate={navigate} />)}
+          {FEATURED_DESTINATIONS.map(destination => {
+            const tour = TOURS.find(tour => tour.id === destination.id);
+            return tour ? <TourCard key={tour.id} tour={tour} navigate={navigate} /> : (
+              <article key={destination.id} className={`${card} rounded-2xl overflow-hidden flex flex-col`}>
+                <div className="relative h-52">
+                  <DestinationImage src={"image" in destination ? destination.image : ""} alt={"imageAlt" in destination ? destination.imageAlt : destination.name} position={"imagePosition" in destination ? destination.imagePosition : undefined} className="w-full h-full object-cover" />
+                  <span className="absolute top-3 left-3 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full capitalize">{destination.category}</span>
+                </div>
+                <div className="p-6 flex flex-col flex-1">
+                  <p className="flex items-center gap-1.5 text-muted-foreground text-sm mb-2"><MapPin size={14} aria-hidden="true" />{"location" in destination ? destination.location : destination.name}</p>
+                  <h3 className="text-primary font-bold text-xl leading-snug mb-3" style={{ fontFamily: "var(--font-display)" }}>{destination.name}</h3>
+                  <p className="text-muted-foreground text-sm leading-7 mb-6">Itinerary, dates and pricing will be shared once confirmed.</p>
+                  <div className="border-t border-border pt-4 mt-auto">
+                    <p className="flex items-center gap-2 text-primary text-sm font-semibold mb-1"><Clock size={15} aria-hidden="true" />Package coming soon</p>
+                    <p className="text-xs text-muted-foreground">Not yet available for booking</p>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
 
-      {/* WHY CHOOSE US */}
+      {/* ASSOCIATIONS */}
       <section className={`py-20 ${sectionAlt}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14">
-            <p className={labelTxt + " mb-2"}>Why Travel With Us</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-amber-950" style={{ fontFamily: "'Playfair Display', serif" }}>Your Journey, Our Passion</h2>
+            <p className={labelTxt + " mb-2"}>Our Travel Network</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-primary" style={{ fontFamily: "var(--font-display)" }}>Associated With</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { icon: Shield, title: "15+ Years of Trust", body: "Established in Aurangabad in 2009, we have built a reputation for reliability and warmth across thousands of journeys and families served." },
-              { icon: Globe, title: "50+ Destinations", body: "From Ladakh's high passes to Bali's rice terraces — our curated portfolio spans domestic pilgrimages and international adventures." },
-              { icon: Users, title: "Personalised Care", body: "Every itinerary is tailored to your preferences, budget, and travel style. We are your co-travellers, not just a booking desk." },
-            ].map(f => (
-              <div key={f.title} className={`${card} ${cardHover} rounded-2xl p-8 transition-all group`}>
-                <div className="w-12 h-12 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center mb-5 group-hover:bg-amber-200 transition-colors">
-                  <f.icon size={22} className="text-amber-600" />
+          {ASSOCIATIONS.length ? (
+            <MovingStrip label="Association logos" direction="left" duration={40}>
+              {ASSOCIATIONS.map(association => (
+                <div key={association.name} className={`${card} w-56 rounded-xl p-6 text-center`}>
+                  <DestinationImage src={association.logo} alt={association.name} className="w-full h-20 object-contain mb-3" />
+                  <p className="text-sm text-primary font-semibold">{association.name}</p>
                 </div>
-                <h3 className="text-amber-950 font-bold text-lg mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>{f.title}</h3>
-                <p className={bodyTxt}>{f.body}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </MovingStrip>
+          ) : <p className={`${card} rounded-2xl p-8 text-center text-muted-foreground text-sm`}>Association details will be shared here once confirmed.</p>}
         </div>
+      </section>
+
+      {/* OFFERS */}
+      <section className="py-16 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="text-center mb-10">
+          <p className={labelTxt + " mb-2"}>Travel Updates</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-primary" style={{ fontFamily: "var(--font-display)" }}>Offers</h2>
+        </div>
+        {OFFERS.length ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+            {OFFERS.map(offer => {
+              const tour = TOURS.find(tour => tour.id === offer.tourId);
+              return <article key={offer.id} className={`${card} rounded-2xl p-7`}>
+                <h3 className="text-primary font-bold text-lg mb-2">{offer.title}</h3>
+                <p className={bodyTxt}>{offer.benefit}</p>
+                <p className={bodyTxt + " mt-3"}>Applicable tour: {tour?.name ?? offer.tourId}</p>
+                <p className={bodyTxt}>Valid until: {offer.validUntil}</p>
+                <p className={bodyTxt + " mb-5"}>{offer.terms}</p>
+                <button onClick={() => tour ? navigate("tour-detail", tour) : enquire(offer.tourId)} className="bg-primary text-white rounded-full px-5 py-2 text-sm font-bold hover:bg-primary-hover">{tour ? "View tour" : "Enquire about this offer"}</button>
+              </article>;
+            })}
+          </div>
+        ) : (
+          <div className={`${card} rounded-2xl p-8 text-center mb-6`}>
+            <p className="text-primary font-semibold mb-2">No offers are currently confirmed.</p>
+            <p className={bodyTxt + " mb-5"}>Approved offers and their terms will appear here. Contact our team for current travel options.</p>
+            <button onClick={() => navigate("contact")} className="bg-primary text-white rounded-full px-5 py-2 text-sm font-bold hover:bg-primary-hover">Enquire about travel options</button>
+          </div>
+        )}
+        <MovingStrip label="Travel announcements" direction="left" duration={40}>
+          {(OFFERS.length ? OFFERS.map(offer => offer.announcement) : ["No offers are currently confirmed. Contact our team for current travel options."]).map(announcement => (
+            <p key={announcement} className="whitespace-nowrap py-4 px-6 border-y-2 border-accent text-primary text-sm font-semibold">{announcement}</p>
+          ))}
+        </MovingStrip>
       </section>
 
       {/* FIXED DEPARTURES */}
       <section className="py-20 px-4 sm:px-6 max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <p className={labelTxt + " mb-2"}>Upcoming</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-amber-950" style={{ fontFamily: "'Playfair Display', serif" }}>Fixed Departures</h2>
+          <p className={labelTxt + " mb-2"}>Plan Ahead</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-primary" style={{ fontFamily: "var(--font-display)" }}>Fixed Departures</h2>
           <p className={mutedTxt + " mt-3 max-w-xl mx-auto text-sm"}>
-            Guaranteed departure tours — book your seat and travel with like-minded explorers.
+            Departure schedules are awaiting confirmation. Enquire for dates, duration, fares, and availability.
           </p>
         </div>
-        <div className="rounded-2xl border border-amber-200 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
+        <div className="rounded-2xl border border-border overflow-hidden shadow-sm">
+          <div className="overflow-x-auto" role="region" aria-label="Fixed departure schedules" tabIndex={0}>
             <table className="w-full min-w-[640px]">
+              <caption className="sr-only">Fixed departures. All schedules, fares, and availability are unconfirmed.</caption>
               <thead>
-                <tr className="bg-amber-50 border-b border-amber-200">
-                  {["Destination", "Departure Date", "Duration", "Seats Left", "Price / Person", ""].map(h => (
-                    <th key={h} className="text-left px-5 py-4 text-amber-600/70 text-[10px] font-bold tracking-widest uppercase">{h}</th>
+                <tr className="bg-background border-b border-border">
+                  {["Destination", "Departure Date", "Duration", "Availability", "Price / Person", "Enquiry"].map(h => (
+                    <th key={h} scope="col" className="text-left px-5 py-4 text-muted-foreground text-[10px] font-bold tracking-widest uppercase">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="bg-white">
                 {FIXED_DEPARTURES.map((dep, i) => (
-                  <tr key={i} className="border-b border-amber-100 hover:bg-amber-50/80 transition-colors">
-                    <td className="px-5 py-4 text-amber-950 font-semibold text-sm">{dep.destination}</td>
+                  <tr key={i} className="border-b border-border hover:bg-muted transition-colors">
+                    <td className="px-5 py-4 text-primary font-semibold text-sm">{dep.destination}</td>
                     <td className="px-5 py-4">
-                      <div className="flex items-center gap-2 text-amber-800/60 text-sm">
-                        <Calendar size={12} className="text-amber-500" />{dep.date}
+                      <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                        <Calendar size={12} className="text-primary" />{dep.date}
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <div className="flex items-center gap-2 text-amber-800/60 text-sm">
-                        <Clock size={12} className="text-amber-500" />{dep.duration}
+                      <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                        <Clock size={12} className="text-primary" />{dep.duration}
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${dep.seats <= 6 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-700"}`}>
-                        {dep.seats} left
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
+                        {dep.availability}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-amber-600 font-bold text-sm">{dep.price}</td>
+                    <td className="px-5 py-4 text-primary font-bold text-sm">{dep.price}</td>
                     <td className="px-5 py-4">
-                      <button onClick={() => navigate("contact")} className="text-[11px] bg-amber-100 border border-amber-300 text-amber-700 px-3 py-1.5 rounded-full hover:bg-amber-200 transition-colors font-bold">
+                      <button onClick={() => enquire(dep.destination)} className="text-[11px] bg-primary border border-primary text-white px-3 py-1.5 rounded-full hover:bg-primary-hover transition-colors font-bold">
                         Enquire
                       </button>
                     </td>
@@ -606,23 +741,23 @@ function HomePage({ navigate }: { navigate: (p: Page, t?: Tour) => void }) {
       </section>
 
       {/* SERVICES STRIP */}
-      <section className={`py-16 ${sectionAlt} border-y border-amber-200`}>
+      <section className={`py-16 ${sectionAlt} border-y border-border`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-10">
-            <p className={labelTxt + " mb-2"}>One-Stop Travel Shop</p>
-            <h2 className="text-3xl font-bold text-amber-950" style={{ fontFamily: "'Playfair Display', serif" }}>All Services Under One Roof</h2>
+            <p className={labelTxt + " mb-2"}>One Stop Travel Solution</p>
+            <h2 className="text-3xl font-bold text-primary" style={{ fontFamily: "var(--font-display)" }}>All Services Under One Roof</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {SERVICES.slice(0, 6).map(s => (
-              <button key={s.name} onClick={() => navigate("services")} className="flex flex-col items-center gap-3 p-5 bg-white border border-amber-200 rounded-xl hover:border-amber-400 hover:bg-amber-50 transition-all group text-center shadow-sm">
-                <s.icon size={20} className="text-amber-500 group-hover:text-amber-600 transition-colors" />
-                <span className="text-amber-800 text-[11px] font-semibold group-hover:text-amber-900 transition-colors leading-tight">{s.name}</span>
+            {HOME_SERVICES.map(s => (
+              <button key={s.id} onClick={() => navigate("services")} className="flex flex-col items-center gap-3 p-5 bg-white border border-border rounded-xl hover:border-primary hover:bg-muted transition-all group text-center shadow-sm">
+                <s.icon size={20} className="text-primary group-hover:text-primary-hover transition-colors" />
+                <span className="text-foreground text-[11px] font-semibold group-hover:text-primary-hover transition-colors leading-tight">{s.name}</span>
               </button>
             ))}
           </div>
           <div className="text-center mt-6">
-            <button onClick={() => navigate("services")} className="text-amber-600 text-xs hover:text-amber-700 transition-colors underline underline-offset-4 decoration-amber-400/40 font-bold">
-              View all 11 services →
+            <button onClick={() => navigate("services")} className="text-primary text-xs hover:text-primary-hover transition-colors underline underline-offset-4 decoration-accent font-bold">
+              View all {SERVICES.length} services →
             </button>
           </div>
         </div>
@@ -632,22 +767,22 @@ function HomePage({ navigate }: { navigate: (p: Page, t?: Tour) => void }) {
       <section className="py-20 px-4 sm:px-6 max-w-7xl mx-auto">
         <div className="text-center mb-14">
           <p className={labelTxt + " mb-2"}>Happy Travellers</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-amber-950" style={{ fontFamily: "'Playfair Display', serif" }}>What Our Guests Say</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-primary" style={{ fontFamily: "var(--font-display)" }}>What Our Guests Say</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <MovingStrip label="Guest reviews" direction="right" duration={55}>
           {TESTIMONIALS.map(t => (
-            <div key={t.name} className={`${card} rounded-2xl p-7 flex flex-col gap-4`}>
-              <div className="flex gap-1">
-                {Array.from({ length: t.rating }).map((_, i) => <Star key={i} size={13} className="text-amber-400 fill-amber-400" />)}
+            <article key={t.name} className={`${card} w-[min(320px,80vw)] md:w-96 rounded-2xl p-7 flex flex-col gap-4`}>
+              <div className="flex gap-1" role="img" aria-label={`${t.rating} out of 5 stars`}>
+                {Array.from({ length: t.rating }).map((_, i) => <Star key={i} size={13} className="text-accent fill-accent" />)}
               </div>
-              <p className="text-amber-800/65 text-sm leading-relaxed italic">"{t.text}"</p>
-              <div className="mt-auto pt-4 border-t border-amber-100">
-                <div className="font-bold text-amber-950 text-sm">{t.name}</div>
-                <div className="text-amber-600/60 text-xs mt-0.5">{t.location} · {t.tour}</div>
+              <p className="text-muted-foreground text-sm leading-relaxed italic">"{t.text}"</p>
+              <div className="mt-auto pt-4 border-t border-border">
+                <div className="font-bold text-primary text-sm">{t.name}</div>
+                <div className="text-muted-foreground text-xs mt-0.5">{t.location} · {t.tour}</div>
               </div>
-            </div>
+            </article>
           ))}
-        </div>
+        </MovingStrip>
       </section>
 
       {/* CTA BANNER */}
@@ -657,19 +792,19 @@ function HomePage({ navigate }: { navigate: (p: Page, t?: Tour) => void }) {
           alt="Ladakh river valley"
           className="w-full h-64 md:h-72 object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-amber-950/90 via-amber-900/65 to-transparent flex items-center">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/90 to-primary/80 flex items-center">
           <div className="px-8 md:px-16 max-w-xl">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3" style={{ fontFamily: "var(--font-display)" }}>
               Ready to Start Your Journey?
             </h2>
-            <p className="text-amber-100/70 text-sm mb-6 leading-relaxed">
+            <p className="text-white text-sm mb-6 leading-relaxed">
               Call us at +91 9422203584 or send an enquiry — our team will craft the perfect itinerary within 24 hours.
             </p>
             <div className="flex flex-wrap gap-3">
-              <button onClick={() => navigate("contact")} className="bg-amber-400 text-amber-950 font-bold px-6 py-2.5 rounded-full text-sm hover:bg-amber-300 transition-colors shadow">
+              <button onClick={() => navigate("contact")} className="bg-accent text-accent-foreground font-bold px-6 py-2.5 rounded-full text-sm hover:bg-white hover:text-primary-hover transition-colors shadow">
                 Get a Free Quote
               </button>
-              <button onClick={() => navigate("tours")} className="border border-amber-300/50 text-amber-200 px-6 py-2.5 rounded-full text-sm hover:border-amber-300 hover:text-white transition-colors font-semibold">
+              <button onClick={() => navigate("tours")} className="border border-white text-white px-6 py-2.5 rounded-full text-sm hover:bg-primary-hover hover:text-white transition-colors font-semibold">
                 Browse All Tours
               </button>
             </div>
@@ -686,47 +821,44 @@ function HomePage({ navigate }: { navigate: (p: Page, t?: Tour) => void }) {
 
 function TourCard({ tour, navigate }: { tour: Tour; navigate: (p: Page, t?: Tour) => void }) {
   return (
-    <div
-      className={`group ${card} ${cardHover} rounded-2xl overflow-hidden transition-all cursor-pointer`}
-      onClick={() => navigate("tour-detail", tour)}
-    >
-      <div className="relative overflow-hidden h-52 bg-amber-100">
-        <img src={tour.image} alt={tour.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+    <article className={`group relative ${card} ${cardHover} rounded-2xl overflow-hidden transition-all flex flex-col`}>
+      <div className="relative overflow-hidden h-52 shrink-0 bg-background">
+        <DestinationImage src={tour.image} alt={tour.imageAlt ?? tour.destination} position={tour.imagePosition} className="w-full h-full object-cover motion-safe:group-hover:scale-105 transition-transform duration-500" />
         <div className="absolute top-3 left-3">
-          <span className="bg-amber-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full capitalize shadow">
+          <span className="bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full capitalize shadow">
             {tour.category === "weekend" ? "Weekend" : tour.category}
           </span>
         </div>
-        <div className="absolute bottom-3 right-3 bg-white/85 backdrop-blur-sm text-amber-700 text-xs font-bold px-3 py-1.5 rounded-full shadow">
+        <div className="absolute bottom-3 right-3 bg-background backdrop-blur-sm text-primary text-sm font-bold px-3 py-1.5 rounded-full shadow">
           {tour.price}
         </div>
       </div>
-      <div className="p-5">
-        <div className="flex items-center gap-1.5 text-amber-500 text-[11px] mb-1.5 font-semibold">
-          <MapPin size={10} />{tour.destination}
+      <div className="p-6 flex flex-col flex-1">
+        <div className="flex items-center gap-1.5 text-muted-foreground text-sm mb-2">
+          <MapPin size={14} aria-hidden="true" />{tour.destination}
         </div>
-        <h3 className="text-amber-950 font-bold text-base mb-1.5 group-hover:text-amber-700 transition-colors leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h3 className="text-primary font-bold text-xl mb-3 group-hover:text-primary-hover transition-colors leading-snug" style={{ fontFamily: "var(--font-display)" }}>
           {tour.name}
         </h3>
-        <div className="flex items-center gap-1.5 text-amber-700/50 text-[11px] mb-3.5 font-semibold">
-          <Clock size={10} />{tour.duration}
+        <div className="flex items-center gap-1.5 text-muted-foreground text-sm mb-4">
+          <Clock size={14} aria-hidden="true" />{tour.duration}
         </div>
-        <div className="flex flex-wrap gap-1.5 mb-4">
+        <div className="flex flex-wrap gap-2 mb-6">
           {tour.highlights.slice(0, 3).map(h => (
-            <span key={h} className="bg-amber-100 border border-amber-200 text-amber-700 text-[10px] px-2 py-0.5 rounded-full">{h}</span>
+            <span key={h} className="bg-muted text-foreground text-xs px-2.5 py-1 rounded-full">{h}</span>
           ))}
         </div>
-        <div className="flex items-center justify-between pt-3 border-t border-amber-100">
+        <div className="flex items-center justify-between gap-2 pt-4 mt-auto border-t border-border">
           <div>
-            <span className="text-amber-600 font-bold text-sm">{tour.price}</span>
-            <span className="text-amber-700/40 text-xs ml-1">/ person</span>
+            <span className="text-primary font-bold text-lg tabular-nums">{tour.price}</span>
+            <span className="text-muted-foreground text-xs ml-1">/ person</span>
           </div>
-          <div className="flex items-center gap-1 text-amber-600 text-xs font-bold group-hover:gap-2 transition-all">
+          <button onClick={() => navigate("tour-detail", tour)} aria-label={`View details for ${tour.name}`} className="flex items-center gap-1 text-primary text-sm font-bold group-hover:gap-2 transition-all after:absolute after:inset-0 after:content-['']">
             Details <ChevronRight size={13} />
-          </div>
+          </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -735,45 +867,50 @@ function TourCard({ tour, navigate }: { tour: Tour; navigate: (p: Page, t?: Tour
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ToursPage({ filter, setFilter, navigate }: { filter: FilterType; setFilter: (f: FilterType) => void; navigate: (p: Page, t?: Tour) => void }) {
-  const filtered = filter === "all" ? TOURS : TOURS.filter(t => t.category === filter);
-  const countOf = (f: FilterType) => f === "all" ? TOURS.length : TOURS.filter(t => t.category === f).length;
+  const filtered = TOURS.filter(tour => matchesTourFilter(tour, filter));
+  const countOf = (f: FilterType) => TOURS.filter(tour => matchesTourFilter(tour, f)).length;
 
   return (
     <div className="pt-24 pb-20">
-      <div className="relative h-56 overflow-hidden bg-amber-200">
-        <img src="https://images.unsplash.com/photo-1627894485200-b92fb4353967?w=1400&h=450&fit=crop&auto=format" alt="Motorcycle in Kashmir mountains" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-amber-950/55 flex items-center justify-center">
+      <div className="relative h-56 overflow-hidden bg-background">
+        <DestinationImage src="https://images.unsplash.com/photo-1627894485200-b92fb4353967?w=1400&h=450&fit=crop&auto=format" alt="A traveller resting in the Kashmir mountains" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white" style={{ fontFamily: "'Playfair Display', serif" }}>All Tours</h1>
-            <p className="text-amber-100/60 mt-2 text-sm">Domestic · International · Weekend Getaways</p>
+            <h1 className="text-4xl md:text-5xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>All Tours</h1>
+            <p className="text-white mt-2 text-sm">Domestic · International · Weekend Getaways</p>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-10">
-        <div className="flex flex-wrap gap-2 mb-10">
-          {([
-            { f: "all", label: "All Tours" },
-            { f: "domestic", label: "Domestic Tours" },
-            { f: "international", label: "International Tours" },
-            { f: "weekend", label: "Weekend Getaways" },
-          ] as const).map(({ f, label }) => (
+        <div className="flex flex-wrap gap-2 mb-10" role="group" aria-label="Filter tours">
+          {TOUR_FILTERS.map(({ f, label }) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
+              aria-pressed={filter === f}
+              aria-controls="tour-results"
               className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
                 filter === f
-                  ? "bg-amber-500 text-white shadow"
-                  : "bg-white border border-amber-200 text-amber-800 hover:border-amber-400 hover:bg-amber-50 shadow-sm"
+                  ? "bg-primary text-white shadow"
+                  : "bg-white border border-border text-foreground hover:border-primary hover:bg-muted shadow-sm"
               }`}
             >
-              {label} <span className={`text-[10px] ml-1 ${filter === f ? "opacity-70" : "opacity-50"}`}>({countOf(f)})</span>
+              {label} <span className={`text-[10px] ml-1 ${filter === f ? "text-white" : "text-muted-foreground"}`}>({countOf(f)})</span>
             </button>
           ))}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <p className="sr-only" role="status">{filtered.length} tours in {TOUR_FILTERS.find(option => option.f === filter)?.label}</p>
+        <div id="tour-results" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map(tour => <TourCard key={tour.id} tour={tour} navigate={navigate} />)}
         </div>
+        {filtered.length === 0 && (
+          <div className={`${card} rounded-2xl p-10 text-center`}>
+            <h2 className="text-primary text-xl font-bold mb-3">No tours in this collection yet.</h2>
+            <p className={bodyTxt + " mb-5"}>Confirmed packages will be listed here when available. Explore our other journeys in the meantime.</p>
+            <button onClick={() => setFilter("all")} className="bg-primary text-white rounded-full px-6 py-2 text-sm font-bold hover:bg-primary-hover">Browse all tours</button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -788,23 +925,24 @@ function TourDetailPage({ tour, expandedDay, setExpandedDay, navigate }: {
 }) {
   const [enquirySent, setEnquirySent] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", email: "", month: "", travellers: "" });
+  const image = tour.banner ?? { src: tour.image, alt: tour.imageAlt ?? tour.destination, position: tour.imagePosition };
 
   return (
     <div className="pt-20">
-      <div className="relative h-[55vh] min-h-80 overflow-hidden bg-amber-200">
-        <img src={tour.image} alt={tour.name} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#fffbf0] via-amber-950/25 to-transparent" />
+      <div className="relative h-[55vh] min-h-80 overflow-hidden bg-background">
+        <DestinationImage key={tour.id} {...image} priority className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/5 pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 px-4 sm:px-8 pb-10 max-w-7xl mx-auto">
-          <button onClick={() => navigate("tours")} className="flex items-center gap-1.5 text-amber-200/80 text-xs mb-3 hover:text-white transition-colors font-semibold">
+          <button onClick={() => navigate("tours")} className="flex items-center gap-1.5 text-white text-xs mb-3 hover:text-white transition-colors font-semibold">
             ← Back to all tours
           </button>
-          <span className="bg-amber-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full capitalize mb-3 inline-block shadow">
+          <span className="bg-primary text-white text-[11px] font-bold px-2.5 py-1 rounded-full capitalize mb-3 inline-block shadow">
             {tour.category}
           </span>
-          <h1 className="text-3xl md:text-5xl font-bold text-amber-950 mt-2" style={{ fontFamily: "'Playfair Display', serif" }}>{tour.name}</h1>
+          <h1 className="text-3xl md:text-5xl font-bold text-white mt-2" style={{ fontFamily: "var(--font-display)" }}>{tour.name}</h1>
           <div className="flex flex-wrap items-center gap-5 mt-3">
-            <div className="flex items-center gap-1.5 text-amber-800/70 text-sm"><MapPin size={13} className="text-amber-500" />{tour.destination}</div>
-            <div className="flex items-center gap-1.5 text-amber-800/70 text-sm"><Clock size={13} className="text-amber-500" />{tour.duration}</div>
+            <div className="flex items-center gap-1.5 text-white text-sm"><MapPin size={13} className="text-white" />{tour.destination}</div>
+            <div className="flex items-center gap-1.5 text-white text-sm"><Clock size={13} className="text-white" />{tour.duration}</div>
           </div>
         </div>
       </div>
@@ -812,39 +950,40 @@ function TourDetailPage({ tour, expandedDay, setExpandedDay, navigate }: {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid grid-cols-1 lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-12">
           <div>
-            <h2 className="text-2xl font-bold text-amber-950 mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>About This Tour</h2>
+            <h2 className="text-2xl font-bold text-primary mb-4" style={{ fontFamily: "var(--font-display)" }}>About This Tour</h2>
             <p className={bodyTxt}>{tour.description}</p>
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold text-amber-950 mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Highlights</h2>
+            <h2 className="text-2xl font-bold text-primary mb-4" style={{ fontFamily: "var(--font-display)" }}>Highlights</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {tour.highlights.map(h => (
-                <div key={h} className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-                  <div className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
-                  <span className="text-amber-800/80 text-sm">{h}</span>
+                <div key={h} className="flex items-center gap-3 bg-background border border-border rounded-xl px-4 py-3">
+                  <div className="w-2 h-2 rounded-full bg-accent shrink-0" />
+                  <span className="text-muted-foreground text-sm">{h}</span>
                 </div>
               ))}
             </div>
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold text-amber-950 mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Day-by-Day Itinerary</h2>
+            <h2 className="text-2xl font-bold text-primary mb-4" style={{ fontFamily: "var(--font-display)" }}>Day-by-Day Itinerary</h2>
             <div className="space-y-2">
               {tour.itinerary.map(item => (
-                <div key={item.day} className="border border-amber-200 rounded-xl overflow-hidden shadow-sm">
+                <div key={item.day} className="border border-border rounded-xl overflow-hidden shadow-sm">
                   <button
                     onClick={() => setExpandedDay(expandedDay === item.day ? null : item.day)}
-                    className="w-full flex items-center justify-between px-5 py-4 bg-white hover:bg-amber-50 transition-colors text-left"
+                    aria-expanded={expandedDay === item.day}
+                    className="w-full flex items-center justify-between px-5 py-4 bg-white hover:bg-muted transition-colors text-left"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-amber-500 text-xs font-bold">{item.day}</span>
-                      <span className="text-amber-950 text-sm font-semibold">{item.title}</span>
+                      <span className="text-primary text-xs font-bold">{item.day}</span>
+                      <span className="text-primary text-sm font-semibold">{item.title}</span>
                     </div>
-                    <ChevronDown size={15} className={`text-amber-500 transition-transform shrink-0 ${expandedDay === item.day ? "rotate-180" : ""}`} />
+                    <ChevronDown size={15} className={`text-primary transition-transform shrink-0 ${expandedDay === item.day ? "rotate-180" : ""}`} />
                   </button>
                   {expandedDay === item.day && (
-                    <div className="px-5 py-4 bg-amber-50 text-amber-800/65 text-sm leading-relaxed">
+                    <div className="px-5 py-4 bg-background text-muted-foreground text-sm leading-relaxed">
                       {item.description}
                     </div>
                   )}
@@ -855,21 +994,21 @@ function TourDetailPage({ tour, expandedDay, setExpandedDay, navigate }: {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-lg font-bold text-amber-950 mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>What's Included</h3>
+              <h3 className="text-lg font-bold text-primary mb-4" style={{ fontFamily: "var(--font-display)" }}>What's Included</h3>
               <ul className="space-y-2.5">
                 {tour.includes.map(i => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-amber-800/65">
-                    <span className="text-green-600 mt-0.5 shrink-0 font-bold">✓</span>{i}
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                    <span className="text-green-700 mt-0.5 shrink-0 font-bold">✓</span>{i}
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <h3 className="text-lg font-bold text-amber-950 mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>What's Excluded</h3>
+              <h3 className="text-lg font-bold text-primary mb-4" style={{ fontFamily: "var(--font-display)" }}>What's Excluded</h3>
               <ul className="space-y-2.5">
                 {tour.excludes.map(e => (
-                  <li key={e} className="flex items-start gap-2.5 text-sm text-amber-800/65">
-                    <span className="text-red-500/70 mt-0.5 shrink-0 font-bold">✗</span>{e}
+                  <li key={e} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                    <span className="text-red-700 mt-0.5 shrink-0 font-bold">✗</span>{e}
                   </li>
                 ))}
               </ul>
@@ -879,17 +1018,17 @@ function TourDetailPage({ tour, expandedDay, setExpandedDay, navigate }: {
 
         {/* Sidebar */}
         <div className="lg:col-span-1">
-          <div className="sticky top-24 bg-white border border-amber-200 rounded-2xl p-6 shadow-md">
-            <div className="text-3xl font-bold text-amber-600 mb-0.5" style={{ fontFamily: "'Playfair Display', serif" }}>{tour.price}</div>
-            <div className="text-amber-700/45 text-xs mb-6">{tour.priceNote}</div>
+          <div className="sticky top-24 bg-white border border-border rounded-2xl p-6 shadow-md">
+            <div className="text-3xl font-bold text-primary mb-0.5" style={{ fontFamily: "var(--font-display)" }}>{tour.price}</div>
+            <div className="text-muted-foreground text-xs mb-6">{tour.priceNote}</div>
 
             {enquirySent ? (
               <div className="text-center py-8">
                 <div className="w-14 h-14 rounded-full bg-green-100 border border-green-300 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-green-600 text-xl font-bold">✓</span>
+                  <span className="text-green-700 text-xl font-bold">✓</span>
                 </div>
-                <p className="text-amber-950 font-bold text-sm mb-1">Enquiry Sent!</p>
-                <p className="text-amber-700/50 text-xs">We'll contact you within 24 hours.</p>
+                <p className="text-primary font-bold text-sm mb-1">Enquiry Sent!</p>
+                <p className="text-muted-foreground text-xs">We'll contact you within 24 hours.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -899,13 +1038,13 @@ function TourDetailPage({ tour, expandedDay, setExpandedDay, navigate }: {
                   { key: "email", placeholder: "Email Address", type: "email" },
                   { key: "travellers", placeholder: "No. of Travellers", type: "number" },
                 ].map(({ key, placeholder, type }) => (
-                  <input key={key} type={type} placeholder={placeholder}
+                  <input key={key} type={type} placeholder={placeholder} aria-label={placeholder}
                     value={form[key as keyof typeof form]}
                     onChange={e => setForm({ ...form, [key]: e.target.value })}
                     className={inputCls}
                   />
                 ))}
-                <select value={form.month} onChange={e => setForm({ ...form, month: e.target.value })}
+                <select aria-label="Preferred Travel Month" value={form.month} onChange={e => setForm({ ...form, month: e.target.value })}
                   className={inputCls + " appearance-none"}>
                   <option value="">Preferred Travel Month</option>
                   {["January","February","March","April","May","June","July","August","September","October","November","December"].map(m => (
@@ -913,15 +1052,15 @@ function TourDetailPage({ tour, expandedDay, setExpandedDay, navigate }: {
                   ))}
                 </select>
                 <button onClick={() => setEnquirySent(true)}
-                  className="w-full bg-amber-500 text-white font-bold py-3 rounded-xl hover:bg-amber-600 transition-colors text-sm mt-1 shadow">
+                  className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary-hover transition-colors text-sm mt-1 shadow">
                   Send Enquiry
                 </button>
               </div>
             )}
 
-            <div className="mt-5 pt-4 border-t border-amber-100 text-center">
-              <p className="text-amber-700/40 text-xs mb-1">or call us directly</p>
-              <a href="tel:+919422203584" className="text-amber-600 font-bold text-sm">+91 9422203584</a>
+            <div className="mt-5 pt-4 border-t border-border text-center">
+              <p className="text-muted-foreground text-xs mb-1">or call us directly</p>
+              <a href="tel:+919422203584" className="text-primary font-bold text-sm">+91 9422203584</a>
             </div>
           </div>
         </div>
@@ -940,7 +1079,7 @@ function ServicesPage({ navigate }: { navigate: (p: Page) => void }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
           <p className={labelTxt + " mb-2"}>What We Offer</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-amber-950 mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Our Services</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4" style={{ fontFamily: "var(--font-display)" }}>Our Services</h1>
           <p className={mutedTxt + " max-w-2xl mx-auto text-sm leading-relaxed"}>
             Everything you need for a seamless journey — from the moment you enquire to the day you return home.
           </p>
@@ -948,20 +1087,20 @@ function ServicesPage({ navigate }: { navigate: (p: Page) => void }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {SERVICES.map(s => (
             <div key={s.name} className={`${card} ${cardHover} rounded-2xl p-7 transition-all group`}>
-              <div className="w-12 h-12 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center mb-5 group-hover:bg-amber-200 transition-colors">
-                <s.icon size={22} className="text-amber-600" />
+              <div className="w-12 h-12 rounded-xl bg-accent border border-accent flex items-center justify-center mb-5 group-hover:border-foreground transition-colors">
+                <s.icon size={22} className="text-accent-foreground" />
               </div>
-              <h3 className="text-amber-950 font-bold text-lg mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>{s.name}</h3>
+              <h3 className="text-primary font-bold text-lg mb-2" style={{ fontFamily: "var(--font-display)" }}>{s.name}</h3>
               <p className={bodyTxt}>{s.description}</p>
             </div>
           ))}
         </div>
-        <div className={`mt-14 text-center ${sectionAlt} border border-amber-200 rounded-3xl p-12 shadow-sm`}>
-          <h2 className="text-2xl font-bold text-amber-950 mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>Need Something Specific?</h2>
+        <div className={`mt-14 text-center ${sectionAlt} border border-border rounded-3xl p-12 shadow-sm`}>
+          <h2 className="text-2xl font-bold text-primary mb-3" style={{ fontFamily: "var(--font-display)" }}>Need Something Specific?</h2>
           <p className={mutedTxt + " text-sm mb-7 max-w-md mx-auto leading-relaxed"}>
             We handle custom requests, group bookings, corporate travel, and special occasions.
           </p>
-          <button onClick={() => navigate("contact")} className="bg-amber-500 text-white font-bold px-8 py-3 rounded-full hover:bg-amber-600 transition-colors text-sm shadow">
+          <button onClick={() => navigate("contact")} className="bg-primary text-white font-bold px-8 py-3 rounded-full hover:bg-primary-hover transition-colors text-sm shadow">
             Contact Us
           </button>
         </div>
@@ -977,12 +1116,12 @@ function ServicesPage({ navigate }: { navigate: (p: Page) => void }) {
 function AboutPage({ navigate }: { navigate: (p: Page) => void }) {
   return (
     <div className="pt-24 pb-20">
-      <div className="relative h-56 overflow-hidden bg-amber-200">
+      <div className="relative h-56 overflow-hidden bg-background">
         <img src="https://images.unsplash.com/photo-1631774934803-554afa7371c9?w=1400&h=450&fit=crop&auto=format" alt="Ellora caves stone architecture" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-amber-950/60 flex items-center justify-center">
+        <div className="absolute inset-0 bg-primary/80 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white" style={{ fontFamily: "'Playfair Display', serif" }}>Our Story</h1>
-            <p className="text-amber-100/60 mt-2 text-sm">15+ years of crafting unforgettable journeys</p>
+            <h1 className="text-4xl md:text-5xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Our Story</h1>
+            <p className="text-white mt-2 text-sm">15+ years of crafting unforgettable journeys</p>
           </div>
         </div>
       </div>
@@ -991,7 +1130,7 @@ function AboutPage({ navigate }: { navigate: (p: Page) => void }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center mb-20">
           <div>
             <p className={labelTxt + " mb-3"}>Who We Are</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-amber-950 mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6" style={{ fontFamily: "var(--font-display)" }}>
               Born in Aurangabad,<br />Rooted in India
             </h2>
             <div className="space-y-4">
@@ -1002,25 +1141,25 @@ function AboutPage({ navigate }: { navigate: (p: Page) => void }) {
           </div>
           <div className="relative">
             <img src="https://images.unsplash.com/photo-1631774933370-d596a344e851?w=700&h=520&fit=crop&auto=format" alt="Ellora caves visitors" className="rounded-2xl w-full object-cover h-80 shadow-lg" />
-            <div className="absolute -bottom-4 -left-4 bg-amber-500 text-white font-bold rounded-2xl px-6 py-4 shadow-xl">
-              <div className="text-2xl" style={{ fontFamily: "'Playfair Display', serif" }}>2009</div>
-              <div className="text-xs font-bold opacity-80">Founded in Aurangabad</div>
+            <div className="absolute -bottom-4 -left-4 bg-primary text-white font-bold rounded-2xl px-6 py-4 shadow-xl">
+              <div className="text-2xl" style={{ fontFamily: "var(--font-display)" }}>2009</div>
+              <div className="text-xs font-bold text-white">Founded in Aurangabad</div>
             </div>
           </div>
         </div>
 
-        <div className="bg-amber-500 rounded-3xl p-10 grid grid-cols-2 md:grid-cols-4 gap-8 mb-20 shadow-lg">
+        <div className="bg-background rounded-3xl p-10 grid grid-cols-2 md:grid-cols-4 gap-8 mb-20 shadow-lg">
           {STATS.map(s => (
             <div key={s.label} className="text-center">
-              <div className="text-4xl font-bold text-white" style={{ fontFamily: "'Playfair Display', serif" }}>{s.value}</div>
-              <div className="text-white/70 text-sm mt-1">{s.label}</div>
+              <div className="text-4xl font-bold text-primary" style={{ fontFamily: "var(--font-display)" }}>{s.value}</div>
+              <div className="text-muted-foreground text-sm mt-1">{s.label}</div>
             </div>
           ))}
         </div>
 
         <div className="text-center mb-12">
           <p className={labelTxt + " mb-2"}>Why Ellora Tours</p>
-          <h2 className="text-3xl font-bold text-amber-950" style={{ fontFamily: "'Playfair Display', serif" }}>The Ellora Difference</h2>
+          <h2 className="text-3xl font-bold text-primary" style={{ fontFamily: "var(--font-display)" }}>The Ellora Difference</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-14">
           {[
@@ -1030,14 +1169,14 @@ function AboutPage({ navigate }: { navigate: (p: Page) => void }) {
             { title: "Customised Itineraries", body: "Every itinerary is tailored to your budget, interests, travel pace, dietary preferences, and mobility requirements." },
           ].map(f => (
             <div key={f.title} className={`${card} rounded-xl p-6`}>
-              <h3 className="text-amber-950 font-bold text-base mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>{f.title}</h3>
+              <h3 className="text-primary font-bold text-base mb-2" style={{ fontFamily: "var(--font-display)" }}>{f.title}</h3>
               <p className={bodyTxt}>{f.body}</p>
             </div>
           ))}
         </div>
 
         <div className="text-center">
-          <button onClick={() => navigate("contact")} className="bg-amber-500 text-white font-bold px-8 py-3 rounded-full hover:bg-amber-600 transition-colors shadow">
+          <button onClick={() => navigate("contact")} className="bg-primary text-white font-bold px-8 py-3 rounded-full hover:bg-primary-hover transition-colors shadow">
             Plan Your Journey With Us
           </button>
         </div>
@@ -1061,7 +1200,7 @@ function ContactPage({ formData, setFormData }: {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-14">
           <p className={labelTxt + " mb-2"}>Reach Out</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-amber-950 mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Get in Touch</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4" style={{ fontFamily: "var(--font-display)" }}>Get in Touch</h1>
           <p className={mutedTxt + " max-w-xl mx-auto text-sm leading-relaxed"}>
             Tell us where you want to go and we'll craft the perfect itinerary. No obligation — just a conversation about your dream trip.
           </p>
@@ -1076,12 +1215,12 @@ function ContactPage({ formData, setFormData }: {
               { icon: Clock, label: "Working Hours", value: "Mon – Sat: 9:30 AM – 7:00 PM\nSunday: 10:00 AM – 2:00 PM" },
             ].map(c => (
               <div key={c.label} className={`flex gap-4 ${card} rounded-xl p-5`}>
-                <div className="w-10 h-10 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center shrink-0">
-                  <c.icon size={17} className="text-amber-600" />
+                <div className="w-10 h-10 rounded-xl bg-accent border border-accent flex items-center justify-center shrink-0">
+                  <c.icon size={17} className="text-accent-foreground" />
                 </div>
                 <div>
-                  <div className="text-amber-500 text-[10px] font-bold uppercase tracking-wider mb-1">{c.label}</div>
-                  <div className="text-amber-900/70 text-sm whitespace-pre-line leading-relaxed">{c.value}</div>
+                  <div className="text-primary text-[10px] font-bold uppercase tracking-wider mb-1">{c.label}</div>
+                  <div className="text-muted-foreground text-sm whitespace-pre-line leading-relaxed">{c.value}</div>
                 </div>
               </div>
             ))}
@@ -1091,25 +1230,25 @@ function ContactPage({ formData, setFormData }: {
             {sent ? (
               <div className="h-full flex flex-col items-center justify-center text-center py-12 gap-4">
                 <div className="w-16 h-16 rounded-full bg-green-100 border border-green-300 flex items-center justify-center">
-                  <span className="text-green-600 text-2xl font-bold">✓</span>
+                  <span className="text-green-700 text-2xl font-bold">✓</span>
                 </div>
-                <h3 className="text-amber-950 font-bold text-xl" style={{ fontFamily: "'Playfair Display', serif" }}>Enquiry Sent!</h3>
-                <p className="text-amber-700/55 text-sm max-w-xs leading-relaxed">Thank you! Our team will reach out within 24 hours to help plan your journey.</p>
-                <button onClick={() => setSent(false)} className="mt-2 text-amber-600 text-sm hover:text-amber-700 underline underline-offset-4 font-semibold">
+                <h3 className="text-primary font-bold text-xl" style={{ fontFamily: "var(--font-display)" }}>Enquiry Sent!</h3>
+                <p className="text-muted-foreground text-sm max-w-xs leading-relaxed">Thank you! Our team will reach out within 24 hours to help plan your journey.</p>
+                <button onClick={() => setSent(false)} className="mt-2 text-primary text-sm hover:text-primary-hover underline underline-offset-4 font-semibold">
                   Send another enquiry
                 </button>
               </div>
             ) : (
               <form onSubmit={e => { e.preventDefault(); setSent(true); }} className="space-y-4">
-                <h2 className="text-xl font-bold text-amber-950 mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>Send an Enquiry</h2>
+                <h2 className="text-xl font-bold text-primary mb-6" style={{ fontFamily: "var(--font-display)" }}>Send an Enquiry</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <input required type="text" placeholder="Full Name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className={inputCls} />
-                  <input required type="email" placeholder="Email Address" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className={inputCls} />
+                  <input required type="text" aria-label="Full Name" placeholder="Full Name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className={inputCls} />
+                  <input required type="email" aria-label="Email Address" placeholder="Email Address" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className={inputCls} />
                 </div>
-                <input type="tel" placeholder="Phone Number" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} className={inputCls} />
-                <input type="text" placeholder="Destination of Interest (e.g. Kashmir, Dubai, Europe...)" value={formData.destination} onChange={e => setFormData({ ...formData, destination: e.target.value })} className={inputCls} />
-                <textarea rows={4} placeholder="Tell us about your travel plans — travel dates, group size, budget, special requests..." value={formData.message} onChange={e => setFormData({ ...formData, message: e.target.value })} className={inputCls + " resize-none"} />
-                <button type="submit" className="w-full bg-amber-500 text-white font-bold py-3 rounded-xl hover:bg-amber-600 transition-colors text-sm shadow">
+                <input type="tel" aria-label="Phone Number" placeholder="Phone Number" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} className={inputCls} />
+                <input type="text" aria-label="Destination of Interest" placeholder="Destination of Interest (e.g. Kashmir, Dubai, Europe...)" value={formData.destination} onChange={e => setFormData({ ...formData, destination: e.target.value })} className={inputCls} />
+                <textarea rows={4} aria-label="Travel plans" placeholder="Tell us about your travel plans — travel dates, group size, budget, special requests..." value={formData.message} onChange={e => setFormData({ ...formData, message: e.target.value })} className={inputCls + " resize-none"} />
+                <button type="submit" className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary-hover transition-colors text-sm shadow">
                   Send Enquiry
                 </button>
               </form>

@@ -1,0 +1,226 @@
+@layer theme, base, components, utilities;
+
+@layer components {
+.ellora-destination-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: #004aa3;
+  color: #fff;
+  font-size: 0.875rem;
+}
+
+.ellora-image-slider {
+  min-width: 0;
+}
+
+.ellora-image-slider__carousel,
+.ellora-image-slider [data-slot="carousel-content"],
+.ellora-image-slider__track,
+.ellora-image-slider__slide {
+  height: 100%;
+}
+
+.ellora-image-slider__track {
+  margin-left: 0;
+  touch-action: pan-y pinch-zoom;
+}
+
+.ellora-image-slider__slide {
+  padding-left: 0;
+}
+
+.ellora-image-slider__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ellora-image-slider__controls {
+  position: absolute;
+  z-index: 30;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: max-content;
+  max-width: calc(100% - 1.5rem);
+  padding: 0.25rem;
+  border: 1px solid #fff;
+  border-radius: 999px;
+  background: #004aa3;
+  color: #fff;
+  pointer-events: auto;
+}
+
+.ellora-motion-button,
+.ellora-image-slider__indicator {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: #004aa3;
+  color: #fff;
+  cursor: pointer;
+}
+
+.ellora-motion-button:hover,
+.ellora-image-slider__indicator:hover {
+  background: #003676;
+}
+
+.ellora-motion-button:disabled,
+.ellora-image-slider__indicator:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.ellora-motion-button:focus-visible,
+.ellora-image-slider__indicator:focus-visible,
+.ellora-image-slider__carousel:focus-visible {
+  outline: 3px solid #f25b26;
+  outline-offset: 3px;
+}
+
+.ellora-image-slider__indicators {
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 0.25rem;
+}
+
+.ellora-image-slider__indicator {
+  min-width: 1.75rem;
+}
+
+.ellora-image-slider__indicator span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid #fff;
+  border-radius: 999px;
+}
+
+.ellora-image-slider__indicator[aria-current="true"] span {
+  background: #fff;
+  box-shadow: 0 0 0 3px #f25b26;
+}
+
+.ellora-moving-strip {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ellora-moving-strip__controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.ellora-motion-button--label {
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.ellora-moving-strip__viewport {
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.ellora-moving-strip__track {
+  display: flex;
+  width: max-content;
+  animation: ellora-strip-left var(--ellora-strip-duration, 55s) linear infinite;
+}
+
+.ellora-moving-strip__track[data-direction="right"] {
+  animation-name: ellora-strip-right;
+}
+
+.ellora-moving-strip__group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 1.5rem;
+  min-width: 100cqw;
+  padding: 0.25rem 1.5rem 0.25rem 0;
+}
+
+.ellora-moving-strip__group > * {
+  flex-shrink: 0;
+}
+
+.ellora-moving-strip[data-static="true"] .ellora-moving-strip__track {
+  display: block;
+  width: 100%;
+  animation: none;
+  transform: none;
+}
+
+.ellora-moving-strip[data-static="true"] .ellora-moving-strip__group {
+  flex-wrap: wrap;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.25rem 0;
+}
+
+.ellora-moving-strip[data-static="true"] .ellora-moving-strip__group[aria-hidden="true"] {
+  display: none;
+}
+
+.ellora-moving-strip[data-static="true"] .ellora-moving-strip__group > * {
+  max-width: 100%;
+  /* Static accessibility mode must also wrap consumer nowrap ticker text. */
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+
+@keyframes ellora-strip-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes ellora-strip-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ellora-moving-strip__track {
+    display: block;
+    width: 100%;
+    animation: none;
+    transform: none;
+  }
+
+  .ellora-moving-strip__group {
+    flex-wrap: wrap;
+    justify-content: center;
+    min-width: 0;
+    padding: 0.25rem 0;
+  }
+
+  .ellora-moving-strip__group[aria-hidden="true"],
+  .ellora-moving-strip__controls {
+    display: none;
+  }
+
+  .ellora-moving-strip__group > * {
+    max-width: 100%;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+}
+}
