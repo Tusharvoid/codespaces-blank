@@ -3,8 +3,8 @@
 :root,
 .dark {
   --font-size: 16px;
-  --font-body: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Manrope', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Outfit', 'Poppins', ui-sans-serif, system-ui, sans-serif;
   --background: #ffffff;
   --foreground: #1f2937;
   --card: #ffffff;

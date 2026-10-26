@@ -26,4 +26,9 @@ The local CC BY-SA image versions remain under their respective licenses above; 
 
 ## Local Fonts
 
-Manrope (Copyright 2018 The Manrope Project Authors) and DM Sans (Copyright 2014 The DM Sans Project Authors) are served from `src/assets/fonts/` under the SIL Open Font License 1.1. The copyright notices and full license are included in `src/assets/fonts/OFL.txt` and linked from the site's credits. WOFF2 Latin and Latin Extended subsets are distributed unchanged from Google Fonts.
+Manrope (Copyright 2018 The Manrope Project Authors) and DM Sans (Copyright 2014 The DM Sans Project Authors) are served from `src/assets/fonts/` under the SIL Open Font License 1.1. The copyright notices and full license are included in `src/assets/fonts/OFL.txt`. WOFF2 Latin and Latin Extended subsets are distributed unchanged from Google Fonts.
+
+
+### Current website typography
+
+Outfit is used for headings and the Ellora wordmark; Poppins is used for body text, navigation, buttons and forms. The WOFF2 subsets are self-hosted unchanged from Google Fonts. Their SIL Open Font License notices are included in `src/assets/fonts/OUTFIT-OFL.txt` and `src/assets/fonts/POPPINS-OFL.txt`. The previous font assets and their license remain available in the repository.

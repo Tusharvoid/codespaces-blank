@@ -16,12 +16,6 @@
   min-width: 0;
 }
 
-.ellora-home-banners {
-  width: 100%;
-  max-width: 64rem;
-  margin-inline: auto;
-}
-
 .ellora-image-slider__track {
   margin-left: 0;
   touch-action: pan-y pinch-zoom;
