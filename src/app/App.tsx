@@ -512,7 +512,7 @@ export default function App() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 border-t border-border pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-white text-xs">© 2025 Ellora Tours & Travels. All rights reserved.</p>
+          <p className="text-white text-xs">© {new Date().getFullYear()} Ellora Tours & Travels. All rights reserved.</p>
           <p className="text-white text-xs">Explore Happiness · Aurangabad, Maharashtra</p>
         </div>
       </footer>
@@ -529,7 +529,7 @@ function HomePage({ navigate, enquire }: { navigate: (p: Page, t?: Tour) => void
     <div>
       {/* HERO */}
       <section className="pt-16 md:pt-20 bg-primary">
-        <ImageSlider images={BANNER_IMAGES} label="Ellora Tours banners" autoplay priority className="aspect-video w-full" />
+        <ImageSlider images={BANNER_IMAGES} label="Ellora Tours banners" autoplay priority className="ellora-home-banners" />
         <div className="py-12 md:py-16">
 
         <div className="relative z-10 text-center px-4 w-full max-w-4xl mx-auto">

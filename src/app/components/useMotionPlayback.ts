@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export function useMotionPlayback(enabled: boolean) {
+export function useMotionPlayback(enabled: boolean, { pauseOnInteraction = true } = {}) {
   const ref = useRef<HTMLDivElement>(null);
   const [reducedMotion, setReducedMotion] = useState(true);
   const [inView, setInView] = useState(false);
@@ -83,6 +83,6 @@ export function useMotionPlayback(enabled: boolean) {
     paused,
     togglePlayback,
     running: enabled && !reducedMotion && inView && tabVisible && !paused
-      && (!hovered || resumeHover) && (!focused || resumeFocus),
+      && (!pauseOnInteraction || ((!hovered || resumeHover) && (!focused || resumeFocus))),
   };
 }

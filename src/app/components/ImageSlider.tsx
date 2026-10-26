@@ -67,7 +67,8 @@ export function ImageSlider({
   const [selected, setSelected] = useState(0);
   const [dragging, setDragging] = useState(false);
   const multiple = images.length > 1;
-  const motion = useMotionPlayback(autoplay && multiple);
+  // Keep rotating after hover, arrow clicks, and swipes; Pause controls playback.
+  const motion = useMotionPlayback(autoplay && multiple, { pauseOnInteraction: false });
   const running = motion.running && !interactionPaused;
   const galleryId = useId();
 
@@ -95,7 +96,7 @@ export function ImageSlider({
     const timer = window.setTimeout(() => {
       if (api.canScrollNext()) api.scrollNext();
       else api.scrollTo(0);
-    }, 6000);
+    }, 4000);
     return () => window.clearTimeout(timer);
   }, [api, running, dragging, selected, images.length]);
 
