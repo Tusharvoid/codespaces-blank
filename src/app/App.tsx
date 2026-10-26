@@ -6,14 +6,11 @@ import {
   CreditCard, FileText, Car, Smartphone, Gift,
   Facebook, Youtube, Instagram, Search,
 } from "lucide-react";
-import { DestinationImage, type GalleryImage } from "./components/ImageSlider";
+import { DestinationImage, ImageSlider, type GalleryImage } from "./components/ImageSlider";
 import { MovingStrip } from "./components/MovingStrip";
-import bodhgayaImage from "../assets/destinations/bodhgaya-mahabodhi.jpg";
-import bhutanImage from "../assets/destinations/bhutan-tigers-nest.jpg";
-import baliImage from "../assets/destinations/bali-ulun-danu.jpg";
-import sriLankaImage from "../assets/destinations/sri-lanka-sigiriya.jpg";
+import { BANNER_IMAGES, BANNERS } from "./banners";
+import { whatsappEnquiryUrl, type EnquiryDetails } from "./enquiries";
 import mahabaleshwarImage from "../assets/destinations/mahabaleshwar-elephants-head.jpg";
-import fontLicense from "../assets/fonts/OFL.txt?url";
 
 type Page = "home" | "tours" | "tour-detail" | "services" | "about" | "contact";
 type Experience = "wild-safari" | "strangers" | "adventure" | "meditate-discover";
@@ -47,8 +44,7 @@ const TOURS: Tour[] = [
     category: "domestic",
     duration: "6 Nights / 7 Days",
     image: "https://images.unsplash.com/photo-1627894485200-b92fb4353967?w=800&h=500&fit=crop&auto=format",
-    imageAlt: "A traveller resting in Kashmir's green mountain valley",
-    banner: { src: "https://images.unsplash.com/photo-1627894485200-b92fb4353967?w=1600&h=900&fit=crop&auto=format", alt: "A traveller resting below Kashmir's mountain peaks", position: "50% 45%" },
+    imageAlt: "A traveller resting in Kashmir’s green mountain valley",
     highlights: ["Dal Lake Shikara Ride", "Gulmarg Gondola", "Pahalgam Valley", "Srinagar Houseboats"],
     price: "₹28,500",
     priceNote: "per person (twin sharing)",
@@ -72,7 +68,9 @@ const TOURS: Tour[] = [
     destination: "Leh-Ladakh, India",
     category: "domestic",
     duration: "7 Nights / 8 Days",
-    image: "https://images.unsplash.com/photo-1643368214091-6af1a029aee0?w=800&h=500&fit=crop&auto=format",
+    image: BANNERS.ladakh.src,
+    imageAlt: BANNERS.ladakh.alt,
+    banner: BANNERS.ladakh,
     highlights: ["Pangong Tso Lake", "Nubra Valley Dunes", "Khardung La Pass", "Hemis Monastery"],
     price: "₹32,000",
     priceNote: "per person (twin sharing)",
@@ -96,7 +94,9 @@ const TOURS: Tour[] = [
     destination: "Kerala, India",
     category: "domestic",
     duration: "5 Nights / 6 Days",
-    image: "https://images.unsplash.com/photo-1506461883276-594a12b11cf3?w=800&h=500&fit=crop&auto=format",
+    image: BANNERS.kerala.src,
+    imageAlt: BANNERS.kerala.alt,
+    banner: BANNERS.kerala,
     highlights: ["Alleppey Houseboat", "Munnar Tea Estates", "Fort Kochi Heritage", "Kovalam Beach"],
     price: "₹22,000",
     priceNote: "per person (twin sharing)",
@@ -118,7 +118,9 @@ const TOURS: Tour[] = [
     destination: "Goa, India",
     category: "domestic",
     duration: "3 Nights / 4 Days",
-    image: "https://images.unsplash.com/photo-1623815616454-f4de13de2634?w=800&h=500&fit=crop&auto=format",
+    image: BANNERS.goa.src,
+    imageAlt: BANNERS.goa.alt,
+    banner: BANNERS.goa,
     highlights: ["North & South Goa Beaches", "Old Goa Churches", "Dudhsagar Falls", "Sunset at Vagator"],
     price: "₹14,500",
     priceNote: "per person (twin sharing)",
@@ -138,7 +140,9 @@ const TOURS: Tour[] = [
     destination: "Delhi – Agra – Jaipur",
     category: "domestic",
     duration: "5 Nights / 6 Days",
-    image: "https://images.unsplash.com/photo-1523980077198-60824a7b2148?w=800&h=500&fit=crop&auto=format",
+    image: BANNERS.rajasthan.src,
+    imageAlt: BANNERS.rajasthan.alt,
+    banner: BANNERS.rajasthan,
     highlights: ["Taj Mahal at Sunrise", "Amber Fort Jaipur", "Qutub Minar Delhi", "Fatehpur Sikri"],
     price: "₹18,500",
     priceNote: "per person (twin sharing)",
@@ -161,9 +165,9 @@ const TOURS: Tour[] = [
     destination: "Sri Lanka",
     category: "international",
     duration: "6 Nights / 7 Days",
-    image: sriLankaImage,
-    imageAlt: "Sigiriya rock fortress rising above its ancient gardens in Sri Lanka",
-    imagePosition: "50% 25%",
+    image: BANNERS.sriLanka.src,
+    imageAlt: BANNERS.sriLanka.alt,
+    banner: BANNERS.sriLanka,
     highlights: ["Adam's Peak Sunrise Climb", "Temple of the Tooth Kandy", "Sigiriya Rock Fortress", "Kelaniya Temple"],
     price: "₹55,000",
     priceNote: "per person (twin sharing, includes visa)",
@@ -186,7 +190,9 @@ const TOURS: Tour[] = [
     destination: "Dubai, UAE",
     category: "international",
     duration: "4 Nights / 5 Days",
-    image: "https://images.unsplash.com/flagged/photo-1559717201-fbb671ff56b7?w=800&h=500&fit=crop&auto=format",
+    image: BANNERS.dubai.src,
+    imageAlt: BANNERS.dubai.alt,
+    banner: BANNERS.dubai,
     highlights: ["Burj Khalifa At the Top", "Desert Safari & BBQ", "Dubai Mall Fountain", "Dhow Cruise Marina"],
     price: "₹62,000",
     priceNote: "per person (twin sharing, includes visa)",
@@ -226,25 +232,14 @@ const TOURS: Tour[] = [
 const FEATURED_DESTINATIONS = [
   { id: "kerala", name: "Kerala", category: "domestic" },
   { id: "kashmir", name: "Kashmir", category: "domestic" },
-  { id: "bodhgaya", name: "Bodhgaya", location: "Bihar, India", category: "domestic", image: bodhgayaImage, imageAlt: "Mahabodhi Temple and its gardens in Bodhgaya, Bihar, India", imagePosition: "50% 0%" },
-  { id: "bhutan", name: "Bhutan", location: "Eastern Himalayas", category: "international", image: bhutanImage, imageAlt: "Tiger's Nest monastery perched on a cliff above Paro Valley, Bhutan", imagePosition: "45% 55%" },
-  { id: "bali", name: "Bali", location: "Bali, Indonesia", category: "international", image: baliImage, imageAlt: "Ulun Danu Beratan temple beside Lake Beratan in Bali, Indonesia", imagePosition: "62% 45%" },
+  { id: "bodhgaya", name: "Bodhgaya", location: "Bihar, India", category: "domestic", image: BANNERS.bodhgaya.src, imageAlt: BANNERS.bodhgaya.alt },
+  { id: "bhutan", name: "Bhutan", location: "Eastern Himalayas", category: "international", image: BANNERS.bhutan.src, imageAlt: BANNERS.bhutan.alt },
+  { id: "bali", name: "Bali", location: "Bali, Indonesia", category: "international", image: BANNERS.bali.src, imageAlt: BANNERS.bali.alt },
   { id: "sri-lanka", name: "Sri Lanka", category: "international" },
 ] as const;
 
-const HERO_IMAGE: GalleryImage = {
-  src: "https://images.unsplash.com/photo-1621232082074-1a7750ecc557?w=1920&h=1080&fit=crop&auto=format",
-  alt: "Forested green valley in Kashmir",
-  position: "50% 40%",
-};
 
-const PHOTO_CREDITS = [
-  { title: "Mahabodhi Temple, Bodhgaya", creator: "WeeKeeEditor / Kavit", source: "https://commons.wikimedia.org/wiki/File:Mahabodhi_Temple_-_Bodh_Gaya.jpg", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" },
-  { title: "Tiger's Nest, Bhutan", creator: "Nina R; edit by UnpetitproleX", source: "https://commons.wikimedia.org/wiki/File:Paro_Taktsang,_Bhutan_(edited).jpg", license: "CC BY 2.0", licenseUrl: "https://creativecommons.org/licenses/by/2.0/" },
-  { title: "Ulun Danu Beratan, Bali", creator: "Unsplash", source: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62", license: "Unsplash License", licenseUrl: "https://unsplash.com/license" },
-  { title: "Sigiriya, Sri Lanka", creator: "Bernard Gagnon", source: "https://commons.wikimedia.org/wiki/File:Sigiriya.jpg", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/" },
-  { title: "Needle Hole Point, Mahabaleshwar", creator: "Rishabh Tatiraju", source: "https://commons.wikimedia.org/wiki/File:Needle_Hole_Point_Mahabaleshwar.JPG", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/" },
-];
+
 
 function HelicopterIcon({ size = 24, className }: { size?: number; className?: string }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
@@ -327,7 +322,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "", destination: "", message: "" });
+  const [formData, setFormData] = useState<EnquiryDetails>({ name: "", email: "", phone: "", destination: "", message: "" });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -367,7 +362,7 @@ export default function App() {
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled || page !== "home"
           ? "bg-background backdrop-blur-md border-b border-border shadow-sm"
-          : "bg-transparent"
+          : "bg-primary"
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 md:h-20">
           <button onClick={() => navigate("home")} className="flex items-center gap-3">
@@ -441,7 +436,7 @@ export default function App() {
       {page === "home" && <HomePage navigate={navigate} enquire={enquire} />}
       {page === "tours" && <ToursPage filter={tourFilter} setFilter={setTourFilter} navigate={navigate} />}
       {page === "tour-detail" && selectedTour && (
-        <TourDetailPage tour={selectedTour} expandedDay={expandedDay} setExpandedDay={setExpandedDay} navigate={navigate} />
+        <TourDetailPage key={selectedTour.id} tour={selectedTour} expandedDay={expandedDay} setExpandedDay={setExpandedDay} navigate={navigate} />
       )}
       {page === "services" && <ServicesPage navigate={navigate} />}
       {page === "about" && <AboutPage navigate={navigate} />}
@@ -520,17 +515,6 @@ export default function App() {
           <p className="text-white text-xs">© 2025 Ellora Tours & Travels. All rights reserved.</p>
           <p className="text-white text-xs">Explore Happiness · Aurangabad, Maharashtra</p>
         </div>
-        <details className="max-w-7xl mx-auto px-4 sm:px-6 mt-5 text-white text-xs leading-relaxed">
-          <summary className="cursor-pointer w-fit underline underline-offset-4">Photo &amp; font credits</summary>
-          <p className="mt-4 mb-3">Destination photos are resized and compressed, with crops applied for display. Adapted photos retain their original licenses.</p>
-          <ul className="space-y-2">
-            {PHOTO_CREDITS.map(photo => <li key={photo.title}>
-              <a href={photo.source} target="_blank" rel="noreferrer" className="underline underline-offset-4">{photo.title}</a>{" by "}{photo.creator}{". "}
-              <a href={photo.licenseUrl} target="_blank" rel="noreferrer" className="underline underline-offset-4">{photo.license}</a>.
-            </li>)}
-          </ul>
-          <p className="mt-3">Manrope and DM Sans by their respective project authors, under the <a href={fontLicense} target="_blank" rel="noreferrer" className="underline underline-offset-4">SIL Open Font License 1.1</a>.</p>
-        </details>
       </footer>
     </div>
   );
@@ -544,9 +528,9 @@ function HomePage({ navigate, enquire }: { navigate: (p: Page, t?: Tour) => void
   return (
     <div>
       {/* HERO */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-32">
-        <DestinationImage {...HERO_IMAGE} priority className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/20 pointer-events-none" />
+      <section className="pt-16 md:pt-20 bg-primary">
+        <ImageSlider images={BANNER_IMAGES} label="Ellora Tours banners" autoplay priority className="aspect-video w-full" />
+        <div className="py-12 md:py-16">
 
         <div className="relative z-10 text-center px-4 w-full max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-accent border border-accent rounded-full px-4 py-1.5 mb-7 text-accent-foreground text-[11px] tracking-widest uppercase font-bold backdrop-blur-sm">
@@ -583,7 +567,7 @@ function HomePage({ navigate, enquire }: { navigate: (p: Page, t?: Tour) => void
             ))}
           </div>
         </div>
-
+        </div>
       </section>
 
       {/* STATS BAR */}
@@ -614,9 +598,9 @@ function HomePage({ navigate, enquire }: { navigate: (p: Page, t?: Tour) => void
             const tour = TOURS.find(tour => tour.id === destination.id);
             return tour ? <TourCard key={tour.id} tour={tour} navigate={navigate} /> : (
               <article key={destination.id} className={`${card} rounded-2xl overflow-hidden flex flex-col`}>
-                <div className="relative h-52">
+                <div className="relative aspect-video">
                   <DestinationImage src={"image" in destination ? destination.image : ""} alt={"imageAlt" in destination ? destination.imageAlt : destination.name} position={"imagePosition" in destination ? destination.imagePosition : undefined} className="w-full h-full object-cover" />
-                  <span className="absolute top-3 left-3 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full capitalize">{destination.category}</span>
+                  <span className="absolute bottom-3 left-3 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full capitalize">{destination.category}</span>
                 </div>
                 <div className="p-6 flex flex-col flex-1">
                   <p className="flex items-center gap-1.5 text-muted-foreground text-sm mb-2"><MapPin size={14} aria-hidden="true" />{"location" in destination ? destination.location : destination.name}</p>
@@ -786,13 +770,12 @@ function HomePage({ navigate, enquire }: { navigate: (p: Page, t?: Tour) => void
       </section>
 
       {/* CTA BANNER */}
-      <section className="mx-4 sm:mx-6 mb-20 rounded-3xl overflow-hidden relative shadow-xl">
-        <img
-          src="https://images.unsplash.com/photo-1566323124805-757e5c41d37c?w=1400&h=420&fit=crop&auto=format"
-          alt="Ladakh river valley"
-          className="w-full h-64 md:h-72 object-cover"
+      <section className="mx-4 sm:mx-6 mb-20 rounded-3xl overflow-hidden grid md:grid-cols-2 bg-primary shadow-xl">
+        <DestinationImage
+          {...BANNERS.andaman}
+          className="w-full aspect-video object-cover h-full"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/90 to-primary/80 flex items-center">
+        <div className="flex items-center py-10">
           <div className="px-8 md:px-16 max-w-xl">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3" style={{ fontFamily: "var(--font-display)" }}>
               Ready to Start Your Journey?
@@ -822,9 +805,9 @@ function HomePage({ navigate, enquire }: { navigate: (p: Page, t?: Tour) => void
 function TourCard({ tour, navigate }: { tour: Tour; navigate: (p: Page, t?: Tour) => void }) {
   return (
     <article className={`group relative ${card} ${cardHover} rounded-2xl overflow-hidden transition-all flex flex-col`}>
-      <div className="relative overflow-hidden h-52 shrink-0 bg-background">
+      <div className="relative overflow-hidden aspect-video shrink-0 bg-background">
         <DestinationImage src={tour.image} alt={tour.imageAlt ?? tour.destination} position={tour.imagePosition} className="w-full h-full object-cover motion-safe:group-hover:scale-105 transition-transform duration-500" />
-        <div className="absolute top-3 left-3">
+        <div className="absolute bottom-3 left-3">
           <span className="bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full capitalize shadow">
             {tour.category === "weekend" ? "Weekend" : tour.category}
           </span>
@@ -872,9 +855,9 @@ function ToursPage({ filter, setFilter, navigate }: { filter: FilterType; setFil
 
   return (
     <div className="pt-24 pb-20">
-      <div className="relative h-56 overflow-hidden bg-background">
-        <DestinationImage src="https://images.unsplash.com/photo-1627894485200-b92fb4353967?w=1400&h=450&fit=crop&auto=format" alt="A traveller resting in the Kashmir mountains" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+      <div className="grid md:grid-cols-2 overflow-hidden bg-primary">
+        <DestinationImage {...BANNERS.himachal} className="w-full aspect-video object-cover" />
+        <div className="flex items-center justify-center px-4 py-10">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>All Tours</h1>
             <p className="text-white mt-2 text-sm">Domestic · International · Weekend Getaways</p>
@@ -923,16 +906,14 @@ function ToursPage({ filter, setFilter, navigate }: { filter: FilterType; setFil
 function TourDetailPage({ tour, expandedDay, setExpandedDay, navigate }: {
   tour: Tour; expandedDay: string | null; setExpandedDay: (d: string | null) => void; navigate: (p: Page) => void;
 }) {
-  const [enquirySent, setEnquirySent] = useState(false);
-  const [form, setForm] = useState({ name: "", phone: "", email: "", month: "", travellers: "" });
+  const [form, setForm] = useState({ name: "", phone: "", email: "", month: "", travellers: "", message: "" });
   const image = tour.banner ?? { src: tour.image, alt: tour.imageAlt ?? tour.destination, position: tour.imagePosition };
 
   return (
     <div className="pt-20">
-      <div className="relative h-[55vh] min-h-80 overflow-hidden bg-background">
-        <DestinationImage key={tour.id} {...image} priority className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/5 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 right-0 px-4 sm:px-8 pb-10 max-w-7xl mx-auto">
+      <div className="grid lg:grid-cols-2 overflow-hidden bg-primary">
+        <DestinationImage key={tour.id} {...image} priority className="w-full aspect-video object-cover" />
+        <div className="px-4 sm:px-8 py-10 lg:self-center">
           <button onClick={() => navigate("tours")} className="flex items-center gap-1.5 text-white text-xs mb-3 hover:text-white transition-colors font-semibold">
             ← Back to all tours
           </button>
@@ -1022,16 +1003,10 @@ function TourDetailPage({ tour, expandedDay, setExpandedDay, navigate }: {
             <div className="text-3xl font-bold text-primary mb-0.5" style={{ fontFamily: "var(--font-display)" }}>{tour.price}</div>
             <div className="text-muted-foreground text-xs mb-6">{tour.priceNote}</div>
 
-            {enquirySent ? (
-              <div className="text-center py-8">
-                <div className="w-14 h-14 rounded-full bg-green-100 border border-green-300 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-green-700 text-xl font-bold">✓</span>
-                </div>
-                <p className="text-primary font-bold text-sm mb-1">Enquiry Sent!</p>
-                <p className="text-muted-foreground text-xs">We'll contact you within 24 hours.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
+            <form onSubmit={event => {
+              event.preventDefault();
+              window.location.assign(whatsappEnquiryUrl(form, tour));
+            }} className="space-y-3">
                 {[
                   { key: "name", placeholder: "Your Name", type: "text" },
                   { key: "phone", placeholder: "Phone Number", type: "tel" },
@@ -1039,24 +1014,27 @@ function TourDetailPage({ tour, expandedDay, setExpandedDay, navigate }: {
                   { key: "travellers", placeholder: "No. of Travellers", type: "number" },
                 ].map(({ key, placeholder, type }) => (
                   <input key={key} type={type} placeholder={placeholder} aria-label={placeholder}
+                    required={key === "name" || key === "phone"}
+                    min={key === "travellers" ? 1 : undefined}
+                    step={key === "travellers" ? 1 : undefined}
                     value={form[key as keyof typeof form]}
                     onChange={e => setForm({ ...form, [key]: e.target.value })}
                     className={inputCls}
                   />
                 ))}
-                <select aria-label="Preferred Travel Month" value={form.month} onChange={e => setForm({ ...form, month: e.target.value })}
-                  className={inputCls + " appearance-none"}>
-                  <option value="">Preferred Travel Month</option>
-                  {["January","February","March","April","May","June","July","August","September","October","November","December"].map(m => (
-                    <option key={m} value={m}>{m} 2025</option>
-                  ))}
-                </select>
-                <button onClick={() => setEnquirySent(true)}
+                <label className="block text-sm text-primary font-semibold" htmlFor="travel-month">Preferred Travel Month</label>
+                <input id="travel-month" type="month" value={form.month}
+                  onChange={event => setForm({ ...form, month: event.target.value })}
+                  className={inputCls} />
+                <textarea rows={3} aria-label="Travel plans" placeholder="Message or special requests"
+                  value={form.message} onChange={event => setForm({ ...form, message: event.target.value })}
+                  className={inputCls + " resize-none"} />
+                <button type="submit"
                   className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary-hover transition-colors text-sm mt-1 shadow">
-                  Send Enquiry
+                  Send Enquiry on WhatsApp
                 </button>
-              </div>
-            )}
+                <p className="text-muted-foreground text-xs leading-relaxed">Opens WhatsApp with your tour and contact details. Tap Send in WhatsApp to complete your enquiry.</p>
+            </form>
 
             <div className="mt-5 pt-4 border-t border-border text-center">
               <p className="text-muted-foreground text-xs mb-1">or call us directly</p>
@@ -1116,9 +1094,9 @@ function ServicesPage({ navigate }: { navigate: (p: Page) => void }) {
 function AboutPage({ navigate }: { navigate: (p: Page) => void }) {
   return (
     <div className="pt-24 pb-20">
-      <div className="relative h-56 overflow-hidden bg-background">
-        <img src="https://images.unsplash.com/photo-1631774934803-554afa7371c9?w=1400&h=450&fit=crop&auto=format" alt="Ellora caves stone architecture" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-primary/80 flex items-center justify-center">
+      <div className="grid md:grid-cols-2 overflow-hidden bg-primary">
+        <DestinationImage {...BANNERS.rajasthan} className="w-full aspect-video object-cover" />
+        <div className="flex items-center justify-center px-4 py-10">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>Our Story</h1>
             <p className="text-white mt-2 text-sm">15+ years of crafting unforgettable journeys</p>
@@ -1140,7 +1118,7 @@ function AboutPage({ navigate }: { navigate: (p: Page) => void }) {
             </div>
           </div>
           <div className="relative">
-            <img src="https://images.unsplash.com/photo-1631774933370-d596a344e851?w=700&h=520&fit=crop&auto=format" alt="Ellora caves visitors" className="rounded-2xl w-full object-cover h-80 shadow-lg" />
+            <DestinationImage {...BANNERS.vietnam} className="rounded-2xl w-full aspect-video object-cover shadow-lg" />
             <div className="absolute -bottom-4 -left-4 bg-primary text-white font-bold rounded-2xl px-6 py-4 shadow-xl">
               <div className="text-2xl" style={{ fontFamily: "var(--font-display)" }}>2009</div>
               <div className="text-xs font-bold text-white">Founded in Aurangabad</div>
@@ -1190,11 +1168,9 @@ function AboutPage({ navigate }: { navigate: (p: Page) => void }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ContactPage({ formData, setFormData }: {
-  formData: { name: string; email: string; phone: string; destination: string; message: string };
-  setFormData: (d: any) => void;
+  formData: EnquiryDetails;
+  setFormData: (d: EnquiryDetails) => void;
 }) {
-  const [sent, setSent] = useState(false);
-
   return (
     <div className="pt-28 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -1227,32 +1203,23 @@ function ContactPage({ formData, setFormData }: {
           </div>
 
           <div className={`lg:col-span-3 ${card} rounded-2xl p-8`}>
-            {sent ? (
-              <div className="h-full flex flex-col items-center justify-center text-center py-12 gap-4">
-                <div className="w-16 h-16 rounded-full bg-green-100 border border-green-300 flex items-center justify-center">
-                  <span className="text-green-700 text-2xl font-bold">✓</span>
-                </div>
-                <h3 className="text-primary font-bold text-xl" style={{ fontFamily: "var(--font-display)" }}>Enquiry Sent!</h3>
-                <p className="text-muted-foreground text-sm max-w-xs leading-relaxed">Thank you! Our team will reach out within 24 hours to help plan your journey.</p>
-                <button onClick={() => setSent(false)} className="mt-2 text-primary text-sm hover:text-primary-hover underline underline-offset-4 font-semibold">
-                  Send another enquiry
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={e => { e.preventDefault(); setSent(true); }} className="space-y-4">
+              <form onSubmit={event => {
+                event.preventDefault();
+                window.location.assign(whatsappEnquiryUrl(formData));
+              }} className="space-y-4">
                 <h2 className="text-xl font-bold text-primary mb-6" style={{ fontFamily: "var(--font-display)" }}>Send an Enquiry</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input required type="text" aria-label="Full Name" placeholder="Full Name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className={inputCls} />
                   <input required type="email" aria-label="Email Address" placeholder="Email Address" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className={inputCls} />
                 </div>
                 <input type="tel" aria-label="Phone Number" placeholder="Phone Number" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} className={inputCls} />
-                <input type="text" aria-label="Destination of Interest" placeholder="Destination of Interest (e.g. Kashmir, Dubai, Europe...)" value={formData.destination} onChange={e => setFormData({ ...formData, destination: e.target.value })} className={inputCls} />
-                <textarea rows={4} aria-label="Travel plans" placeholder="Tell us about your travel plans — travel dates, group size, budget, special requests..." value={formData.message} onChange={e => setFormData({ ...formData, message: e.target.value })} className={inputCls + " resize-none"} />
+                <input type="text" aria-label="Destination of Interest" placeholder="Destination of Interest (e.g. Kashmir, Dubai, Europe...)" value={formData.destination ?? ""} onChange={e => setFormData({ ...formData, destination: e.target.value })} className={inputCls} />
+                <textarea rows={4} aria-label="Travel plans" placeholder="Tell us about your travel plans — travel dates, group size, budget, special requests..." value={formData.message ?? ""} onChange={e => setFormData({ ...formData, message: e.target.value })} className={inputCls + " resize-none"} />
                 <button type="submit" className="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary-hover transition-colors text-sm shadow">
-                  Send Enquiry
+                  Send Enquiry on WhatsApp
                 </button>
+                <p className="text-muted-foreground text-xs leading-relaxed">Opens WhatsApp with your message and contact details. Tap Send in WhatsApp to complete your enquiry.</p>
               </form>
-            )}
           </div>
         </div>
       </div>
