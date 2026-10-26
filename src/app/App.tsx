@@ -11,6 +11,7 @@ import { MovingStrip } from "./components/MovingStrip";
 import { BANNERS } from "./banners";
 import { whatsappEnquiryUrl, type EnquiryDetails } from "./enquiries";
 import mahabaleshwarImage from "../assets/destinations/mahabaleshwar-elephants-head.jpg";
+import heroBackground from "../assets/hero/tropical-beach.png";
 
 type Page = "home" | "tours" | "tour-detail" | "services" | "about" | "contact";
 type Experience = "wild-safari" | "strangers" | "adventure" | "meditate-discover";
@@ -528,8 +529,10 @@ function HomePage({ navigate, enquire }: { navigate: (p: Page, t?: Tour) => void
   return (
     <div>
       {/* HERO */}
-      <section className="pt-16 md:pt-20 bg-primary">
-        <div className="py-12 md:py-16">
+      <section className="relative isolate overflow-hidden pt-16 md:pt-20 bg-primary">
+        <DestinationImage src={heroBackground} alt="" priority position="50% 55%" className="absolute inset-0 -z-20 h-full w-full object-cover" />
+        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-b from-slate-950/50 via-slate-950/40 to-slate-950/70" />
+        <div className="py-16 md:py-24">
 
         <div className="relative z-10 text-center px-4 w-full max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-accent border border-accent rounded-full px-4 py-1.5 mb-7 text-accent-foreground text-[11px] tracking-widest uppercase font-bold backdrop-blur-sm">
