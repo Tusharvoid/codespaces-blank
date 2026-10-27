@@ -113,19 +113,6 @@
   max-width: 100%;
 }
 
-.ellora-moving-strip__controls {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
-}
-
-.ellora-motion-button--label {
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
 .ellora-moving-strip__viewport {
   overflow: hidden;
   container-type: inline-size;
@@ -205,8 +192,7 @@
     padding: 0.25rem 0;
   }
 
-  .ellora-moving-strip__group[aria-hidden="true"],
-  .ellora-moving-strip__controls {
+  .ellora-moving-strip__group[aria-hidden="true"] {
     display: none;
   }
 

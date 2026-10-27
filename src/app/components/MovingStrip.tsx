@@ -1,5 +1,4 @@
 import { useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { Pause, Play } from "lucide-react";
 import { cn } from "./ui/utils";
 import { useMotionPlayback } from "./useMotionPlayback";
 import "./motion-components.css";
@@ -33,14 +32,6 @@ export function MovingStrip({ children, label, direction, duration = 55, classNa
         if (!viewportRef.current?.contains(event.relatedTarget as Node | null)) setContentFocused(false);
       }}
     >
-      {!motion.reducedMotion && (
-        <div className="ellora-moving-strip__controls">
-          <button type="button" className="ellora-motion-button ellora-motion-button--label" aria-controls={stripId} aria-label={`${motion.paused ? "Resume" : "Pause"} ${label}`} onClick={motion.togglePlayback}>
-            {motion.paused ? <Play aria-hidden="true" size={16} /> : <Pause aria-hidden="true" size={16} />}
-            {motion.paused ? "Resume" : "Pause"}
-          </button>
-        </div>
-      )}
       <div ref={viewportRef} id={stripId} className="ellora-moving-strip__viewport" aria-live="off">
         <div
           className="ellora-moving-strip__track"
